@@ -1,24 +1,5 @@
 import re
-
-def get_tested_function(assert_statements):
-    """
-    Extracts the name of the function being tested from a list of assert statements.
-
-    Parameters:
-    assert_statements (list of str): List containing assert statements as strings.
-
-    Returns:
-    str or None: The name of the tested function if found, otherwise None.
-    """
-    # Regular expression pattern to capture the function name after 'assert'
-    pattern = re.compile(r'assert\s+(\w+)\s*\(')
-    
-    for stmt in assert_statements:
-        match = pattern.search(stmt)
-        if match:
-            return match.group(1)
-    
-    return None
+from typing import List
 
 def remove_python_code_tags(input_text):
     """
@@ -42,3 +23,11 @@ def remove_python_code_tags(input_text):
     stripped_text = re.sub(r'\n?```\s*$', '', stripped_text)
 
     return stripped_text.strip()
+
+def split_assert_statements(test_list: List[str]) -> List[str]:
+    fixed_test_list = []
+    
+    for test in test_list:
+        fixed_test_list.extend(['assert ' + t.strip() for t in test.split('assert') if t.strip()])
+
+    return fixed_test_list

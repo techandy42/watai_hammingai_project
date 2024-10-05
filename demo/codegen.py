@@ -1,27 +1,25 @@
+import ast 
 from datasets import load_dataset
-from helpers import get_tested_function, remove_python_code_tags
-from request import make_request
+from helpers import remove_python_code_tags
+from request import make_request, make_request_structured_output
 from prompts import CodegenPrompts
-from multiprocessing import Pool, cpu_count
-from functools import partial
-import pandas as pd
 from tqdm import tqdm
 from typing import Optional
-
-def get_function_name(row):
-    function_name = get_tested_function(row["test_list"])
-    return function_name
+from helpers import split_assert_statements
+import concurrent.futures
+from pydantic import BaseModel
+from typing import List
 
 def get_codegen_prompt(row):
     text = row["text"]
-    function_name = row["function_name"]
-    codegen_prompt = CodegenPrompts.get_codegen_prompt(text, function_name)
+    test_list = row["test_list"]
+    io_struct = row["io_struct"]
+    codegen_prompt = CodegenPrompts.get_codegen_prompt(text, io_struct)
     return codegen_prompt
 
 def get_pred_code(row):
-    task_id = row["task_id"]
     codegen_prompt = row["codegen_prompt"]
-    model = "groq/llama-3.1-70b-versatile"
+    model = "gpt-4o-mini-2024-07-18"
     messages = [
         {
             "content": codegen_prompt,
@@ -35,7 +33,6 @@ def get_pred_code(row):
 
     for i in range(num_retry):
         try:
-            # print(f"Running sample no.{task_id} for the {i+1}th time...")
             code = make_request(
                 model=model,
                 messages=messages,
@@ -45,40 +42,99 @@ def get_pred_code(row):
             print(f"Error occurred: {str(e)}")
     
     if code is None:
-        code = ""  # or handle it as needed
+        code = ""
 
     cleaned_code = remove_python_code_tags(code)
 
     return cleaned_code
 
-def run_codegen(num_processes: Optional[int] = None):
+def get_io_struct(row):
+    io_struct_prompt = row["io_struct_prompt"]
+    model = "gpt-4o-mini-2024-07-18"
+    messages = [
+        {
+            "content": io_struct_prompt,
+            "role": "user",
+        }
+    ]
+    class IOStruct(BaseModel):
+        function_name: str
+        input: List[str]
+        output: str
+        specific_output: bool
+        specific_output_values: List[str]
+
+    num_retry = 3
+
+    io_struct = None
+
+    for i in range(num_retry):
+        try:
+            io_struct = make_request_structured_output(
+                model=model,
+                messages=messages,
+                response_format=IOStruct,
+            )
+            break
+        except Exception as e:
+            print(f"Error occurred: {str(e)}")
+    
+    if io_struct is None:
+        io_struct = {}
+
+    return io_struct
+
+def add_comma_to_newline(row, column_name):
+    return str(row[column_name]).replace("\n", ",\n")
+
+def get_split_assert_statements(row, column_name):
+    test_list = row[column_name]
+    test_list = split_assert_statements(test_list)
+    return test_list
+
+def get_io_struct_prompt(row):
+    test_list = row["test_list"]
+    challenge_test_list = row["challenge_test_list"]
+    combined_test_list = [*test_list, *challenge_test_list]
+    io_struct_prompt = CodegenPrompts.get_io_struct_extraction_prompt_markdown(combined_test_list)
+    return io_struct_prompt
+
+def run_codegen(num_threads: Optional[int] = None):
     dataset = load_dataset('google-research-datasets/mbpp')
     test_dataset = dataset["test"]
     df_test = test_dataset.to_pandas()
 
-    # Apply functions sequentially for preparation
-    df_test["function_name"] = df_test.apply(get_function_name, axis=1)
+    df_test["test_list"] = df_test.apply(add_comma_to_newline, axis=1, column_name="test_list")
+    df_test["challenge_test_list"] = df_test.apply(add_comma_to_newline, axis=1, column_name="challenge_test_list")
+    df_test["test_list"] = df_test['test_list'].apply(ast.literal_eval)
+    df_test["challenge_test_list"] = df_test['challenge_test_list'].apply(ast.literal_eval)
+    df_test["test_list"] = df_test.apply(get_split_assert_statements, axis=1, column_name="test_list")
+    df_test["challenge_test_list"] = df_test.apply(get_split_assert_statements, axis=1, column_name="challenge_test_list")
+
+    df_test["io_struct_prompt"] = df_test.apply(get_io_struct_prompt, axis=1)
+
+    print("Running IO Struct extraction...")
+    rows = [row for _, row in df_test.iterrows()]
+    if not num_threads:
+        num_threads = 32
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        io_structs = list(tqdm(executor.map(get_io_struct, rows), total=len(rows)))
+    df_test["io_struct"] = io_structs
+
     df_test["codegen_prompt"] = df_test.apply(get_codegen_prompt, axis=1)
 
-    # Prepare rows for multiprocessing
+    print("Running code generation...")
     rows = [row for _, row in df_test.iterrows()]
-
-    # Define the number of processes
-    if not num_processes:
-        num_processes = cpu_count()
-
-    # Initialize the multiprocessing pool
-    with Pool(processes=num_processes) as pool:
-        # Use tqdm for progress bar (optional)
-        pred_codes = list(tqdm(pool.imap(get_pred_code, rows), total=len(rows)))
-
-    # Assign the results back to the DataFrame
+    if not num_threads:
+        num_threads = 8
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        pred_codes = list(tqdm(executor.map(get_pred_code, rows), total=len(rows)))
     df_test["pred_code"] = pred_codes
 
     return df_test
 
 def main():
-    df_test = run_codegen(num_processes=1)
+    df_test = run_codegen(num_threads=8)
     df_test.to_csv("mbpp_hammingai.csv", index=False)
 
 if __name__ == "__main__":
