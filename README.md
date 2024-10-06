@@ -5,7 +5,10 @@
 - Make sure you have a conda environment installed on local machine before proceeding.
 - Run the following commands to install necessary packages.
 ```
-!conda env create -f environment.yml
+!conda create --name watai_hammingai_project python=3.10
+!conda activate watai_hammingai_project
+!conda install datasets
+!pip install tiktoken litellm
 !cp .env.example .env
 ```
 - Make sure to replace the environment variable values in `.env` file with valid API keys.
@@ -32,10 +35,3 @@
 - Demo code for generating code for MBPP benchmark and testing the code against the provided unit tests.
 - Run `python3 codegen.py` to generate code for the MBPP benchmark. (stores output in `mbpp_hammingai.csv`)
 - Run `python3 codeval.py` to validate the code against the unit tests. (stores output in `mbpp_hammingai_validated.csv`)
-
-### Additional Note
-
-- To save the current package dependencies, run the following command to update the `environment.yml`.
-```
-!conda env export --no-builds | sed '/^prefix:/d' > environment.yml
-```
