@@ -30,8 +30,12 @@
 !git push -u origin <branch-name>
 ```
 
-### Demo
+### Demo (MBPP)
 
 - Demo code for generating code for MBPP benchmark and testing the code against the provided unit tests.
 - Run `python3 codegen.py` to generate code for the MBPP benchmark. (stores output in `mbpp_hammingai.csv`)
 - Run `python3 codeval.py` to validate the code against the unit tests. (stores output in `mbpp_hammingai_validated.csv`)
+
+### o1 Research
+
+- Run `python3 model.py` to run the baseline reverse-engineered o1 model.
