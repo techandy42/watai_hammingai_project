@@ -1,3 +1,4 @@
 **/__pycache__/
 .env
 local_notebooks/
+watai_hammingai_project.egg-info/

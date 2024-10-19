@@ -1,8 +1,8 @@
 import pandas as pd
 import ast
 from tqdm import tqdm
-from prompts import CodevalTemplates
-from process import run_python_code
+from demo.prompts import CodevalTemplates
+from demo.process import run_python_code
 
 tqdm.pandas()
 
