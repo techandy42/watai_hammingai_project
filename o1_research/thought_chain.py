@@ -11,8 +11,6 @@ class Thought:
         self.answers = []
         self.chosen_question_idx = None
         self.chosen_answer_idx = None
-        self.chosen_question_token_count = None
-        self.chosen_answer_token_count = None
 
     def add_question(self, question: str) -> None:
         self.questions.append(question)
@@ -27,13 +25,11 @@ class Thought:
         if idx >= len(self.questions):
             return False
         self.chosen_question_idx = idx
-        self.chosen_question_token_count = count_tokens(self.questions[idx])
 
     def choose_answer(self, idx: int) -> bool:
         if idx >= len(self.answers):
             return False
         self.chosen_answer_idx = idx
-        self.chosen_answer_token_count = count_tokens(self.answers[idx])
 
     def get_question(self) -> Optional[str]:
         if self.chosen_question_idx is None:
@@ -84,10 +80,8 @@ class ThoughtChain:
     def total_path_token_count(self) -> int:
         token_count = 0
         for thought in self.chain:
-            chosen_question_token_count = thought.chosen_question_token_count
-            if chosen_question_token_count is not None:
-                token_count += chosen_question_token_count
-            chosen_answer_token_count = thought.chosen_answer_token_count
-            if chosen_answer_token_count is not None:
-                token_count += chosen_answer_token_count
+            if thought.get_question() is not None:
+                token_count += count_tokens(thought.get_question())
+            if thought.get_answer() is not None:
+                token_count += count_tokens(thought.get_answer())
         return token_count
