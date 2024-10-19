@@ -1,3 +1,4 @@
+import time
 import logging
 import json
 import concurrent.futures
@@ -5,12 +6,14 @@ from typing import Optional
 from tqdm import tqdm
 from datasets import load_dataset
 from o1_research.model import O1BaselineModel
-from o1_research.helpers import MBPPRequestId
+from o1_research.helpers import MBPPRequestId, calc_cost
 from demo.codegen import get_io_struct, get_io_struct_prompt, get_codegen_prompt
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 def run_mbpp(file_path: str, num_threads: Optional[int] = None):
+    start_time = time.time()
+
     dataset = load_dataset('google-research-datasets/mbpp')
     test_dataset = dataset["test"]
     df_test = test_dataset.to_pandas()
@@ -33,7 +36,11 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None):
     base_model = "gpt-4o-mini-2024-07-18"  
     context_limit = 8192
     token_limit = 8192
-    interactive = False 
+    interactive = False
+    total_input_token_count = 0
+    total_output_token_count = 0
+    price_per_mill_input = 0.15
+    price_per_mill_output = 0.6
     
     results = []
     
@@ -55,10 +62,25 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None):
             logging.error(f"Exception for index {idx}: {str(e)}")
         result = model.save_result()
         results.append(result)
+
+        # Update token counts
+        total_input_token_count += model.input_token_count
+        total_output_token_count += model.output_token_count
     
+    print("Saving results...")
     with open(file_path, 'w') as f:
         for result in results:
             f.write(json.dumps(result) + '\n')
+
+    execution_time = time.time() - start_time
+    total_cost = calc_cost(total_input_token_count, total_output_token_count, price_per_mill_input, price_per_mill_output)
+    
+    print("=" * 100)
+    print(f"**Execution Time: {execution_time:.2f} seconds")
+    print(f"**Total Cost: ${total_cost:.4f}")
+    print(f"Input Token Count: {total_input_token_count}")
+    print(f"Output Token Count: {total_output_token_count}")
+    print("=" * 100)
 
 if __name__ == "__main__":
     run_mbpp("mbpp_results.jsonl")
