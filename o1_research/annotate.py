@@ -2,7 +2,7 @@ import logging
 import json
 from tqdm import tqdm
 from datasets import load_dataset
-from model import O1BaselineModel
+from o1_research.model import O1BaselineModel
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 

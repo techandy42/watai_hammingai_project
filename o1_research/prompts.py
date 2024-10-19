@@ -1,6 +1,5 @@
-from helpers import format_prompt
-from thought_chain import Thought, ThoughtChain
-from typing import Literal
+from o1_research.helpers import format_prompt
+from o1_research.thought_chain import Thought, ThoughtChain
 
 class O1BaselinePrompts:
     @staticmethod
