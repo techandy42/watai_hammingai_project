@@ -86,7 +86,23 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None, range: Optional[
     print(f"Output Token Count: {total_output_token_count}")
     print("=" * 100)
 
+def merge_and_sort_jsonl(file_paths, output_file):
+    merged_data = []
+
+    for file_path in file_paths:
+        with open(file_path, 'r') as f:
+            for line in f:
+                data = json.loads(line.strip())
+                merged_data.append(data)
+
+    sorted_data = sorted(merged_data, key=lambda x: MBPPRequestId.extract_request_id(x['id']))
+
+    with open(output_file, 'w') as out_f:
+        for item in sorted_data:
+            out_f.write(json.dumps(item) + '\n')
+
+# Example
 if __name__ == "__main__":
-    range = (450, 500)
+    range = (0, 1)
     file_path = f"mbpp_results_{range[0]}_to_{range[1]-1}.jsonl"
     run_mbpp(file_path=file_path, range=range)

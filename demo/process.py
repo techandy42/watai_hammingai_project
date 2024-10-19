@@ -29,7 +29,7 @@ def run_python_code(code: str) -> Tuple[List[str], int]:
             [sys.executable, temp_file_name],
             capture_output=True,
             text=True,
-            timeout=10  # Optional: prevent hanging indefinitely
+            timeout=30  # Optional: prevent hanging indefinitely
         )
         
         # Split the standard output into a list of lines
