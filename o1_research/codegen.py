@@ -23,18 +23,20 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None, range: Optional[
 
     df_test["io_struct_prompt"] = df_test.apply(get_io_struct_prompt, axis=1)
 
-    print("Running IO Struct extraction...")
-    rows = [row for _, row in df_test.iterrows()]
     if not num_threads:
         num_threads = 8
+
+    print("Running IO Struct extraction...")
+    extraction_model = "gpt-4o-mini-2024-07-18"
+    rows = [row for _, row in df_test.iterrows()]
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
-        io_structs = list(tqdm(executor.map(get_io_struct, rows), total=len(rows)))
+        io_structs = list(tqdm(executor.map(lambda row: get_io_struct(row, extraction_model), rows), total=len(rows)))
     
     df_test["io_struct"] = io_structs
     df_test["codegen_prompt"] = df_test.apply(get_codegen_prompt, axis=1)
 
     system_message = "Only include Python code in your output, do not include any comments or tags."
-    base_model = "gpt-4o-mini-2024-07-18"  
+    base_model = "gpt-4o-mini-2024-07-18"
     context_limit = 8192
     token_limit = 8192
     interactive = False
@@ -67,6 +69,7 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None, range: Optional[
         total_input_token_count += model.input_token_count
         total_output_token_count += model.output_token_count
 
+    print("Running codegen...")
     rows = [row for _, row in df_test.iterrows()]
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
         list(tqdm(executor.map(process_row, rows), total=len(rows)))

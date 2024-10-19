@@ -41,3 +41,10 @@
 ### o1 Research
 
 - Run `python3 model.py` to run the baseline reverse-engineered o1 model.
+
+### Test Results
+
+> MBPP
+
+- GPT-4o Mini (Basic Structure Guide): `61.00%`
+- O1Baseline (GPT-4o Mini) (Basic Structure Guide): `59.80%`
