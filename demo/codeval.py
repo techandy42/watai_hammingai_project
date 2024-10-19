@@ -1,6 +1,7 @@
 import pandas as pd
 import ast
 from tqdm import tqdm
+from typing import Tuple
 from demo.prompts import CodevalTemplates
 from demo.process import run_python_code
 
@@ -15,18 +16,24 @@ def run_code(row):
     stdout_lines, status_code = run_python_code(code)
     return stdout_lines, status_code
 
-def run_codeval():
-    df_test = pd.read_csv("mbpp_hammingai.csv")
+def run_codeval(file_path: str) -> Tuple[pd.DataFrame, float]:
+    df_test = pd.read_csv(file_path)
     df_test["test_list"] = df_test['test_list'].apply(ast.literal_eval)
     df_test["challenge_test_list"] = df_test['challenge_test_list'].apply(ast.literal_eval)
     df_test["code_template"] = df_test.apply(get_code_template, axis=1)
     print("Running unit tests...")
     df_test[['stdout_lines', 'status_code']] = df_test.progress_apply(run_code, axis=1, result_type="expand")
-    return df_test
+    num_success = df_test[df_test['status_code'] == 1].shape[0]
+    total_num = df_test.shape[0]
+    accuracy = num_success / total_num
+    return df_test, accuracy
 
 def main():
-    df_test = run_codeval()
-    df_test.to_csv("mbpp_hammingai_validated.csv", index=False)
+    input_file_path = "mbpp_hammingai.csv"
+    output_file_path = "mbpp_hammingai_validated.csv"
+    df_test, accuracy = run_codeval(input_file_path)
+    df_test.to_csv(output_file_path, index=False)
+    print(f"Accuracy: {accuracy*100:.2f}")
 
 if __name__ == "__main__":
     main()

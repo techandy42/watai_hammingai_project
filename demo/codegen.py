@@ -15,9 +15,8 @@ def get_codegen_prompt(row):
     codegen_prompt = CodegenPrompts.get_codegen_prompt(text, io_struct)
     return codegen_prompt
 
-def get_pred_code(row):
+def get_pred_code(row, model):
     codegen_prompt = row["codegen_prompt"]
-    model = "gpt-4o-mini-2024-07-18"
     messages = [
         {
             "content": codegen_prompt,
@@ -46,9 +45,8 @@ def get_pred_code(row):
 
     return cleaned_code
 
-def get_io_struct(row):
+def get_io_struct(row, model):
     io_struct_prompt = row["io_struct_prompt"]
-    model = "gpt-4o-mini-2024-07-18"
     messages = [
         {
             "content": io_struct_prompt,
@@ -98,6 +96,8 @@ def get_io_struct_prompt(row):
     return io_struct_prompt
 
 def run_codegen(num_threads: Optional[int] = None):
+    extraction_model = "gpt-4o-mini-2024-07-18"
+    codegen_model = "gpt-4o-mini-2024-07-18"
     dataset = load_dataset('google-research-datasets/mbpp')
     test_dataset = dataset["test"]
     df_test = test_dataset.to_pandas()
@@ -114,9 +114,9 @@ def run_codegen(num_threads: Optional[int] = None):
     print("Running IO Struct extraction...")
     rows = [row for _, row in df_test.iterrows()]
     if not num_threads:
-        num_threads = 32
+        num_threads = 8
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
-        io_structs = list(tqdm(executor.map(get_io_struct, rows), total=len(rows)))
+        io_structs = list(tqdm(executor.map(lambda row: get_io_struct(row, extraction_model), rows), total=len(rows)))
     df_test["io_struct"] = io_structs
 
     df_test["codegen_prompt"] = df_test.apply(get_codegen_prompt, axis=1)
@@ -126,14 +126,15 @@ def run_codegen(num_threads: Optional[int] = None):
     if not num_threads:
         num_threads = 8
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
-        pred_codes = list(tqdm(executor.map(get_pred_code, rows), total=len(rows)))
+        pred_codes = list(tqdm(executor.map(lambda row: get_pred_code(row, codegen_model), rows), total=len(rows)))
     df_test["pred_code"] = pred_codes
 
     return df_test
 
 def main():
-    df_test = run_codegen(num_threads=8)
-    df_test.to_csv("mbpp_hammingai.csv", index=False)
+    df_test = run_codegen()
+    file_path = "mbpp_hammingai.csv"
+    df_test.to_csv(file_path, index=False)
 
 if __name__ == "__main__":
     main()
