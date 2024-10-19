@@ -91,14 +91,3 @@ class ThoughtChain:
             if chosen_answer_token_count is not None:
                 token_count += chosen_answer_token_count
         return token_count
-
-    def total_generated_token_count(self) -> int:
-        token_count = 0
-        for thought in self.chain:
-            for question in thought.questions:
-                token_count += count_tokens(question)
-            for role in thought.roles:
-                token_count += count_tokens(role)
-            for answer in thought.answers:
-                token_count += count_tokens(answer)
-        return token_count

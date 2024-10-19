@@ -9,6 +9,9 @@ def count_tokens(text: str, encoding: str = "cl100k_base") -> int:
 def format_prompt(prompt: str) -> str:
     return textwrap.dedent(prompt).strip()
 
+def calc_cost(input_token_count: int, output_token_count: int, price_per_mill_input: float, price_per_mill_output: float) -> float:
+    return ((input_token_count/1_000_000) * price_per_mill_input + (output_token_count/1_000_000) * price_per_mill_output)
+
 class MBPPRequestId:
     @staticmethod
     def create_request_id(task_id: int) -> str:
