@@ -2,7 +2,7 @@ import time
 import logging
 import json
 import concurrent.futures
-from typing import Optional
+from typing import Optional, Tuple
 from tqdm import tqdm
 from datasets import load_dataset
 from o1_research.model import O1BaselineModel
@@ -11,12 +11,15 @@ from demo.codegen import get_io_struct, get_io_struct_prompt, get_codegen_prompt
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-def run_mbpp(file_path: str, num_threads: Optional[int] = None):
+def run_mbpp(file_path: str, num_threads: Optional[int] = None, range: Optional[Tuple[int, int]] = None):
     start_time = time.time()
 
     dataset = load_dataset('google-research-datasets/mbpp')
     test_dataset = dataset["test"]
     df_test = test_dataset.to_pandas()
+    if range is None:
+        range = (0, len(df_test)+1)
+    df_test = df_test.iloc[range[0]:range[1]]
 
     df_test["io_struct_prompt"] = df_test.apply(get_io_struct_prompt, axis=1)
 
@@ -84,4 +87,6 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None):
     print("=" * 100)
 
 if __name__ == "__main__":
-    run_mbpp("mbpp_results.jsonl")
+    range = (450, 500)
+    file_path = f"mbpp_results_{range[0]}_to_{range[1]-1}.jsonl"
+    run_mbpp(file_path=file_path, range=range)

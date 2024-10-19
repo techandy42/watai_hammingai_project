@@ -69,9 +69,9 @@ class CodeValMBPP:
         return len(self.successful_models) / len(self.models)
 
 if __name__ == "__main__":
-    models = initialize_models_from_jsonl("mbpp_results.jsonl")
+    models = initialize_models_from_jsonl("mbpp_results_0_to_49.jsonl")
     code_eval = CodeValMBPP(models)
     code_eval.evaluate()
-    code_eval.save_successful_models("mbpp_successful_results.jsonl")
+    code_eval.save_successful_models("mbpp_successful_results_0_to_49.jsonl")
     eval_accuracy = code_eval.eval_accuracy()
     print(f"Accuracy: {eval_accuracy*100:.2f}")
