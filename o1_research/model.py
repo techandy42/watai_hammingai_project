@@ -1,4 +1,6 @@
 import logging
+import json
+from typing import List
 import time
 from typing import Optional
 from request import make_request_structured_output
@@ -11,7 +13,8 @@ class O1BaselineModel:
     exceed_token_limit = "exceeded_token_limit"
     other_exception = "other_exception"
 
-    def __init__(self, base_model: str, context_limit: int, token_limit: int, initial_question: str, system_message: Optional[str] = None, interactive: bool = False):
+    def __init__(self, request_id: str, base_model: str, context_limit: int, token_limit: int, initial_question: str, system_message: Optional[str] = None, interactive: bool = False):
+        self.request_id = request_id
         self.thought_chain = ThoughtChain(initial_question=initial_question, system_message=system_message)
         self.base_model = base_model
         self.context_limit = context_limit
@@ -126,6 +129,72 @@ class O1BaselineModel:
             logging.info("=" * 100)
 
         return self.thought_chain.get_final_answer()
+
+    # Save results to a dictionary
+    def save_result(self):
+        thoughts_data = []
+        for thought in self.thought_chain.chain: 
+            thought_data = {
+                'questions': thought.questions,
+                'role': thought.roles,
+                'chosen_question_idx': thought.chosen_question_idx,
+                'chosen_question': thought.get_question(),  # chosen question?
+                'answers': thought.answers,
+                'chosen_answer_idx': thought.chosen_answer_idx,
+                'chosen_answer': thought.get_answer(),  # chosen answer
+            }
+            thoughts_data.append(thought_data)
+        
+        initial_question = self.thought_chain.initial_question
+        system_message = self.thought_chain.system_message
+        response = self.thought_chain.get_final_answer()
+        token_count = self.thought_chain.total_generated_token_count()
+        base_model = self.base_model
+        context_limit = self.context_limit
+        token_limit = self.token_limit
+        interactive = self.interactive
+        result = {
+            'id': self.request_id,
+            'initial_question': initial_question,
+            'system_message': system_message,
+            'response': response,
+            'token_count': token_count,
+            'thoughts': thoughts_data,
+            'base_model': base_model,
+            'context_limit': context_limit,
+            'token_limit': token_limit,
+            'interactive': interactive,
+        }
+
+        return result
+
+def initialize_models_from_jsonl(file_path: str) -> List[O1BaselineModel]:
+    models = []
+    with open(file_path, 'r') as f:
+        for line in f:
+            data = json.loads(line)
+            thought_chain = ThoughtChain(initial_question=data['initial_question'], system_message=None)
+            for thought_data in data['thoughts']:
+                thought = Thought()
+                for question, role, answer in zip(thought_data['questions'], thought_data['role'], thought_data['answers']):
+                    thought.add_question(question)
+                    thought.add_role(role)
+                    thought.add_answer(answer)
+                thought.choose_question(thought_data['chosen_question_idx'])
+                thought.choose_answer(thought_data['chosen_answer_idx'])
+                thought_chain.add_thought(thought)
+            model = O1BaselineModel(
+                request_id=data['id'],
+                base_model=data['base_model'],
+                context_limit=data['context_limit'],
+                token_limit=data['token_limit'],
+                initial_question=data['initial_question'],
+                system_message=data['system_message'],
+                interactive=data['interactive']
+            )
+            model.thought_chain = thought_chain
+            models.append(model)
+    return models
 
 if __name__ == "__main__":
     # Define the parameters for the O1BaselineModel
