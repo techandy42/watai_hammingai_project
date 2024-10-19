@@ -1,14 +1,12 @@
 import ast 
-from datasets import load_dataset
-from helpers import remove_python_code_tags
-from request import make_request, make_request_structured_output
-from prompts import CodegenPrompts
-from tqdm import tqdm
-from typing import Optional
-from helpers import split_assert_statements
 import concurrent.futures
+from tqdm import tqdm
+from typing import Optional, List
 from pydantic import BaseModel
-from typing import List
+from datasets import load_dataset
+from demo.helpers import remove_python_code_tags, split_assert_statements
+from demo.request import make_request, make_request_structured_output
+from demo.prompts import CodegenPrompts
 
 def get_codegen_prompt(row):
     text = row["text"]

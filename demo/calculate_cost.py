@@ -1,10 +1,7 @@
 import ast 
 from datasets import load_dataset
-from helpers import get_tested_function, remove_python_code_tags
-from request import make_request
-from prompts import CodegenPrompts
-from typing import Optional
-from helpers import split_assert_statements
+from demo.helpers import get_tested_function, split_assert_statements
+from demo.prompts import CodegenPrompts
 import tiktoken
 
 def get_function_name(row):

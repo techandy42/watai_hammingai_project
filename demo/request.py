@@ -28,7 +28,7 @@ def make_request_structured_output(
     response_format: BaseModel,
     temperature: float = 1.0,
     max_tokens: int = 512,
-) -> str:
+) -> Dict:
     client = OpenAI()
 
     completion = client.beta.chat.completions.parse(

@@ -10,11 +10,13 @@
 !conda install datasets
 !pip install tiktoken litellm
 !cp .env.example .env
+!pip install -e .
 ```
 - Make sure to replace the environment variable values in `.env` file with valid API keys.
 
 - After the installation is finished, run the following commands to get started on a terminal.
 ```
+# Initializes conda environment
 !conda activate watai_hammingai_project
 # Initializes environment variables
 !source .env
