@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict, ClassVar, Optional
+from typing import Any, Dict, ClassVar
 from pydantic import BaseModel, ValidationError
 
 class RoleEnum(str, Enum):

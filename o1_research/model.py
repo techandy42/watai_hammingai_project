@@ -3,10 +3,10 @@ import json
 from typing import List
 import time
 from typing import Optional
-from request import make_request_structured_output
-from prompts import O1BaselinePrompts
-from thought_chain import ThoughtChain, Thought
-from response_format import BaselineQuestion, BaselineAnswer, BaselineRank
+from demo.request import make_request_structured_output
+from o1_research.prompts import O1BaselinePrompts
+from o1_research.thought_chain import ThoughtChain, Thought
+from o1_research.response_format import BaselineQuestion, BaselineAnswer, BaselineRank
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 class O1BaselineModel:
