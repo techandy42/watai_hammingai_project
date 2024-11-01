@@ -1,61 +1,44 @@
-import ast 
 from datasets import load_dataset
-from demo.helpers import get_tested_function, split_assert_statements
-from demo.prompts import CodegenPrompts
 import tiktoken
-
-def get_function_name(row):
-    function_name = get_tested_function(row["test_list"])
-    return function_name
-
-def get_codegen_prompt(row):
-    text = row["text"]
-    function_name = row["function_name"]
-    test_list = row["test_list"]
-    codegen_prompt = CodegenPrompts.get_codegen_prompt(text, function_name, test_list[0])
-    return codegen_prompt
-
-def add_comma_to_newline(row, column_name):
-    return str(row[column_name]).replace("\n", ",\n")
-
-def get_split_assert_statements(row, column_name):
-    test_list = row[column_name]
-    test_list = split_assert_statements(test_list)
-    return test_list
 
 def calculate_token_count(row, column_name, encoding):
     return len(encoding.encode(row[column_name]))
 
-def calc_cost(read_cost: float, write_cost: float) -> float:
-    ### Same as the codegen code
+def calc_cost(read_cost: float, write_cost: float, additional_input: int = 0, 
+              additional_output: int = 0, additional_overall_input: int = 0,
+              additional_overall_output: int = 0) -> float:
+    # Load dataset
     dataset = load_dataset('google-research-datasets/mbpp')
     test_dataset = dataset["test"]
     df_test = test_dataset.to_pandas()
 
-    df_test["test_list"] = df_test.apply(add_comma_to_newline, axis=1, column_name="test_list")
-    df_test["challenge_test_list"] = df_test.apply(add_comma_to_newline, axis=1, column_name="challenge_test_list")
-    df_test["test_list"] = df_test['test_list'].apply(ast.literal_eval)
-    df_test["challenge_test_list"] = df_test['challenge_test_list'].apply(ast.literal_eval)
-    df_test["test_list"] = df_test.apply(get_split_assert_statements, axis=1, column_name="test_list")
-    df_test["challenge_test_list"] = df_test.apply(get_split_assert_statements, axis=1, column_name="challenge_test_list")
-
-    df_test["function_name"] = df_test.apply(get_function_name, axis=1)
-    df_test["codegen_prompt"] = df_test.apply(get_codegen_prompt, axis=1)
-    ###
-
+    # Calculate token counts using text and code columns directly
     encoding = tiktoken.get_encoding("cl100k_base")
-    df_test["codegen_prompt_token_count"] = df_test.apply(calculate_token_count, axis=1, column_name="codegen_prompt", encoding=encoding)
-    df_test["code_token_count"] = df_test.apply(calculate_token_count, axis=1, column_name="code", encoding=encoding)
-    total_read_token_count = df_test["codegen_prompt_token_count"].sum()
-    total_write_token_count = df_test["code_token_count"].sum()
+    df_test["input_token_count"] = df_test.apply(
+        calculate_token_count, axis=1, column_name="text", encoding=encoding
+    ) + additional_input
+    df_test["output_token_count"] = df_test.apply(
+        calculate_token_count, axis=1, column_name="code", encoding=encoding
+    ) + additional_output
+
+    total_read_token_count = df_test["input_token_count"].sum() + additional_overall_input
+    total_write_token_count = df_test["output_token_count"].sum() + additional_overall_output
+
     estimated_cost = (total_read_token_count / 1_000_000) * read_cost + (total_write_token_count / 1_000_000) * write_cost
     return total_read_token_count, total_write_token_count, estimated_cost
 
 if __name__ == "__main__":
-    MODEL_NAME = "gpt-4o-mini-2024-07-18"
-    READ_COST = 0.150
-    WRITE_COST = 0.600
-    read_token_count, write_token_count, estimated_cost = calc_cost(read_cost=READ_COST, write_cost=WRITE_COST)
+    MODEL_NAME = "o1-mini-2024-09-12"
+    READ_COST = 3.00
+    WRITE_COST = 12.00
+    read_token_count, write_token_count, estimated_cost = calc_cost(
+        read_cost=READ_COST,
+        write_cost=WRITE_COST,
+        additional_input=200,
+        additional_output=100,
+        additional_overall_input=0,
+        additional_overall_output=0
+    )
     print(f"Model: {MODEL_NAME}")
     print(f"Read: {read_token_count} tokens / Write: {write_token_count} tokens")
     print(f"Cost: ${estimated_cost:.2f} USD")
