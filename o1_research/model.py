@@ -19,6 +19,7 @@ class O1BaselineModel:
         self, 
         request_id: str, 
         models: List[str],  # List of model names
+        ranking_model: str,
         context_limit: int, 
         token_limit: int, 
         initial_question: str, 
@@ -32,6 +33,7 @@ class O1BaselineModel:
             system_message=system_message
         )
         self.models = models  # List of model names
+        self.ranking_model = ranking_model
         self.context_limit = context_limit
         self.token_limit = token_limit
         self.interactive = interactive
@@ -240,7 +242,8 @@ class O1BaselineModel:
         initial_question = self.thought_chain.initial_question
         system_message = self.thought_chain.system_message
         response = self.thought_chain.get_final_answer()
-        base_model = self.models
+        models = self.models
+        ranking_model = self.ranking_model
         context_limit = self.context_limit
         token_limit = self.token_limit
         interactive = self.interactive
@@ -250,7 +253,8 @@ class O1BaselineModel:
             'system_message': system_message,
             'response': response,
             'thoughts': thoughts_data,
-            'base_model': base_model,
+            'models': models,
+            'ranking_model': ranking_model,
             'context_limit': context_limit,
             'token_limit': token_limit,
             'interactive': interactive,
@@ -275,7 +279,8 @@ def initialize_models_from_jsonl(file_path: str) -> List[O1BaselineModel]:
                 thought_chain.add_thought(thought)
             model = O1BaselineModel(
                 request_id=data['id'],
-                models=data['base_model'],
+                models=data['models'],
+                ranking_model=data['ranking_model'],
                 context_limit=data['context_limit'],
                 token_limit=data['token_limit'],
                 initial_question=data['initial_question'],
@@ -291,21 +296,23 @@ if __name__ == "__main__":
     initial_question = "Write a python function to find the first repeated character in a given string."
     system_message = "Only include Python code in your output, do not include any comments or tags."
     models = [
-        "gpt-4o-2024-08-06",
-        "claude-3-5-sonnet-20240620",
-        "gemini/gemini-1.5-pro",
-        "gpt-4o-mini-2024-07-18"
+        "gpt-4o-2024-08-06", # $2.5/1M input, $10/1M output
+        "claude-3-5-sonnet-20240620", # $3/1M input, $15/1M output
+        "gemini/gemini-1.5-pro", # $1.25/1M input, $5/1M output
+        "command-r-plus-08-2024" # $2.5/1M input, $10/1M output
     ]  # List of 4 models
-    context_limit = 8192
-    token_limit = 8192
+    ranking_model = "gpt-4o-2024-08-06"
+    context_limit = 4096
+    token_limit = 4096
     interactive = True
-    price_per_mill_input = 0.15
-    price_per_mill_output = 0.6
+    price_per_mill_input = (2.5 + 3 + 1.25 + 2.5) / 4
+    price_per_mill_output = (10 + 15 + 5 + 10) / 4
     validation_retries = 3  # Set the number of retries
 
     model = O1BaselineModel(
         request_id=request_id,
         models=models,  # Passing the list of models
+        ranking_model=ranking_model,
         context_limit=context_limit,
         token_limit=token_limit,
         initial_question=initial_question,
