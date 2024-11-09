@@ -266,29 +266,32 @@ def initialize_models_from_jsonl(file_path: str) -> List[O1BaselineModel]:
     models = []
     with open(file_path, 'r') as f:
         for line in f:
-            data = json.loads(line)
-            thought_chain = ThoughtChain(initial_question=data['initial_question'], system_message=None)
-            for thought_data in data['thoughts']:
-                thought = Thought()
-                for question, role, answer in zip(thought_data['questions'], thought_data['role'], thought_data['answers']):
-                    thought.add_question(question)
-                    thought.add_role(role)
-                    thought.add_answer(answer)
-                thought.choose_question(thought_data['chosen_question_idx'])
-                thought.choose_answer(thought_data['chosen_answer_idx'])
-                thought_chain.add_thought(thought)
-            model = O1BaselineModel(
-                request_id=data['id'],
-                models=data['models'],
-                ranking_model=data['ranking_model'],
-                context_limit=data['context_limit'],
-                token_limit=data['token_limit'],
-                initial_question=data['initial_question'],
-                system_message=data['system_message'],
-                interactive=data['interactive']
-            )
-            model.thought_chain = thought_chain
-            models.append(model)
+            try:
+                data = json.loads(line)
+                thought_chain = ThoughtChain(initial_question=data['initial_question'], system_message=None)
+                for thought_data in data['thoughts']:
+                    thought = Thought()
+                    for question, role, answer in zip(thought_data['questions'], thought_data['role'], thought_data['answers']):
+                        thought.add_question(question)
+                        thought.add_role(role)
+                        thought.add_answer(answer)
+                    thought.choose_question(thought_data['chosen_question_idx'])
+                    thought.choose_answer(thought_data['chosen_answer_idx'])
+                    thought_chain.add_thought(thought)
+                model = O1BaselineModel(
+                    request_id=data['id'],
+                    models=data['models'],
+                    ranking_model=data['ranking_model'],
+                    context_limit=data['context_limit'],
+                    token_limit=data['token_limit'],
+                    initial_question=data['initial_question'],
+                    system_message=data['system_message'],
+                    interactive=data['interactive']
+                )
+                model.thought_chain = thought_chain
+                models.append(model)
+            except Exception as e:
+                logging.error(f"Error initializing model from JSONL: {e}")
     return models
 
 if __name__ == "__main__":
