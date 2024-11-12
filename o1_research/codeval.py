@@ -1,3 +1,4 @@
+import argparse
 import json
 import ast
 import pandas as pd
@@ -69,9 +70,16 @@ class CodeValMBPP:
         return len(self.successful_models) / len(self.models)
 
 if __name__ == "__main__":
-    models = initialize_models_from_jsonl("mbpp_results.jsonl")
+    parser = argparse.ArgumentParser(description='Evaluate MBPP code generation results')
+    parser.add_argument('--src_file', required=True, help='Source JSONL file containing models to evaluate')
+    
+    args = parser.parse_args()
+
+    tgt_file = args.src_file.replace(".jsonl", "_successful.jsonl")
+    
+    models = initialize_models_from_jsonl(f"./eval_results/{args.src_file}")
     code_eval = CodeValMBPP(models)
     code_eval.evaluate()
-    code_eval.save_successful_models("mbpp_successful_results.jsonl")
+    code_eval.save_successful_models(f"./eval_results/{tgt_file}")
     eval_accuracy = code_eval.eval_accuracy()
-    print(f"Accuracy: {eval_accuracy*100:.2f}")
+    print(f"Accuracy: {eval_accuracy*100:.2f}%")
