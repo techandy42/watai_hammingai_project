@@ -1,5 +1,6 @@
 import tiktoken
 import textwrap
+import re
 
 def count_tokens(text: str, encoding: str = "cl100k_base") -> int:
     encoding = tiktoken.get_encoding(encoding)
@@ -11,6 +12,11 @@ def format_prompt(prompt: str) -> str:
 
 def calc_cost(input_token_count: int, output_token_count: int, price_per_mill_input: float, price_per_mill_output: float) -> float:
     return ((input_token_count/1_000_000) * price_per_mill_input + (output_token_count/1_000_000) * price_per_mill_output)
+
+def strip_python_tag(text):
+    pattern = r'^\s*```python\s*(.*?)\s*```\s*$'
+    match = re.match(pattern, text, re.DOTALL)
+    return match.group(1) if match else text
 
 class MBPPRequestId:
     @staticmethod

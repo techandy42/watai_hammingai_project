@@ -8,9 +8,10 @@ from demo.request import make_request, make_request_structured_output
 from o1_research.prompts import O1BaselinePrompts
 from o1_research.thought_chain import ThoughtChain, Thought
 from o1_research.response_format import BaselineQuestion, BaselineAnswer, BaselineRank
-from o1_research.helpers import count_tokens, calc_cost
+from o1_research.helpers import count_tokens, calc_cost, strip_python_tag
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+
 class O1BaselineModel:
     exceed_token_limit = "exceeded_token_limit"
     other_exception = "other_exception"
@@ -25,7 +26,7 @@ class O1BaselineModel:
         initial_question: str, 
         system_message: Optional[str] = None, 
         interactive: bool = False,
-        validation_retries: int = 3  # Added parameter for retries
+        validation_retries: int = 5  # Added parameter for retries
     ):
         self.request_id = request_id
         self.thought_chain = ThoughtChain(
@@ -41,6 +42,9 @@ class O1BaselineModel:
         self.input_token_count = 0
         self.output_token_count = 0
         self.validation_retries = validation_retries  # Store the retries parameter
+
+    def supports_structured_output(self, model: str) -> bool:
+        return model in ["gpt-4o", "gpt-4o-mini", "gpt-4o-2024-08-06", "gpt-4o-mini-2024-07-18"]
 
     def think_v1(self) -> str:
         if self.interactive:
@@ -66,14 +70,17 @@ class O1BaselineModel:
                 self.thought_chain.add_thought(thought)
 
                 # Determine the question prompt
-                if self.thought_chain.is_empty():
-                    question_prompt = O1BaselinePrompts.get_initial_question_prompt(self.thought_chain)
-                else:
-                    question_prompt = O1BaselinePrompts.get_followup_question_prompt(self.thought_chain)
+                def get_question_prompt(include_json_format: bool):
+                    if self.thought_chain.is_empty():
+                        question_prompt = O1BaselinePrompts.get_initial_question_prompt(thought_chain=self.thought_chain, include_json_format=include_json_format)
+                    else:
+                        question_prompt = O1BaselinePrompts.get_followup_question_prompt(thought_chain=self.thought_chain, include_json_format=include_json_format)
+                    return question_prompt
 
                 # Generate questions from each model
                 def generate_question(model):
-                    if "gpt-4o" in model:
+                    if self.supports_structured_output(model):
+                        question_prompt = get_question_prompt(include_json_format=False)
                         question_dict = make_request_structured_output(
                             model=model,
                             messages=[{"role": "user", "content": question_prompt}],
@@ -85,6 +92,7 @@ class O1BaselineModel:
                         # Retry logic for models using make_request
                         attempt = 0
                         while attempt < self.validation_retries:
+                            question_prompt = get_question_prompt(include_json_format=True)
                             response = make_request(
                                 model=model,
                                 messages=[{"role": "user", "content": question_prompt}],
@@ -110,6 +118,7 @@ class O1BaselineModel:
                 for i, question_dict in enumerate(futures):
                     thought.add_question(question_dict['question'])
                     thought.add_role(question_dict['role'])
+                    question_prompt = get_question_prompt(include_json_format=(not self.supports_structured_output(self.models[i])))
                     self.input_token_count += count_tokens(question_prompt)
                     self.output_token_count += count_tokens(json.dumps(question_dict))
                     if self.interactive:
@@ -119,46 +128,53 @@ class O1BaselineModel:
                         )
 
                 # Rank the generated questions
-                rank_question_prompt = O1BaselinePrompts.get_rank_question_prompt(self.thought_chain)
+                rank_question_prompt = O1BaselinePrompts.get_rank_question_prompt(thought_chain=self.thought_chain, include_json_format=(not self.supports_structured_output(self.ranking_model)))
                 question_rank_dict = make_request_structured_output(
-                    model=self.models[0],  # Using the first model for ranking
+                    model=self.ranking_model,
                     messages=[{"role": "user", "content": rank_question_prompt}],
                     response_format=BaselineRank,
                     max_tokens=self.context_limit
                 )
-                chosen_question_idx = BaselineRank(**question_rank_dict).map_choice_to_number()
+                question_rankings = BaselineRank(**question_rank_dict).map_rankings_to_numbers()
+                chosen_question_idx = question_rankings[0]
                 thought.choose_question(chosen_question_idx)
+                thought.save_question_rankings(question_rankings)
                 self.input_token_count += count_tokens(rank_question_prompt)
                 self.output_token_count += count_tokens(json.dumps(question_rank_dict))
-                if self.interactive:
+                if self.interactive:        
                     logging.info(
-                        f"Best Question: {thought.get_question()} (Question No.{chosen_question_idx+1} from model "
-                        f"'{self.models[chosen_question_idx]}')"
+                        f"Best Question: {thought.get_question()} (Question No.{question_rankings[0]+1} from model "
+                        f"'{self.models[question_rankings[0]]}')"
                     )
 
                 # Determine the answer prompt
-                if thought.get_role() == Thought.internal:
-                    answer_prompt = O1BaselinePrompts.get_internal_answer_prompt(self.thought_chain)
-                else:
-                    if self.thought_chain.system_message is not None:
-                        answer_prompt = O1BaselinePrompts.get_external_answer_system_message_prompt(self.thought_chain)
+                def get_answer_prompt(include_json_format: bool):
+                    if thought.get_role() == Thought.internal:
+                        answer_prompt = O1BaselinePrompts.get_internal_answer_prompt(thought_chain=self.thought_chain, include_json_format=include_json_format)
                     else:
-                        answer_prompt = O1BaselinePrompts.get_external_answer_prompt(self.thought_chain)
-
+                        if self.thought_chain.system_message is not None:
+                            answer_prompt = O1BaselinePrompts.get_external_answer_system_message_prompt(thought_chain=self.thought_chain, include_json_format=include_json_format)
+                        else:
+                            answer_prompt = O1BaselinePrompts.get_external_answer_prompt(thought_chain=self.thought_chain, include_json_format=include_json_format)
+                    return answer_prompt
+                
                 # Generate answers from each model
                 def generate_answer(model):
-                    if "gpt-4o" in model:
+                    if self.supports_structured_output(model):
+                        answer_prompt = get_answer_prompt(include_json_format=False)
                         answer_dict = make_request_structured_output(
                             model=model,
                             messages=[{"role": "user", "content": answer_prompt}],
                             response_format=BaselineAnswer,
                             max_tokens=self.context_limit
                         )
+                        answer_dict["answer"] = strip_python_tag(answer_dict["answer"])
                         return answer_dict
                     else:
                         # Retry logic for models using make_request
                         attempt = 0
                         while attempt < self.validation_retries:
+                            answer_prompt = get_answer_prompt(include_json_format=True)
                             response = make_request(
                                 model=model,
                                 messages=[{"role": "user", "content": answer_prompt}],
@@ -168,6 +184,7 @@ class O1BaselineModel:
                             try:
                                 validated_response = BaselineAnswer.parse_raw(response)
                                 answer_dict = validated_response.dict()
+                                answer_dict["answer"] = strip_python_tag(answer_dict["answer"])
                                 return answer_dict  # Successful parsing
                             except Exception as e:
                                 logging.error(
@@ -183,6 +200,7 @@ class O1BaselineModel:
                     futures = list(executor.map(generate_answer, self.models))
                 for i, answer_dict in enumerate(futures):
                     thought.add_answer(answer_dict["answer"])
+                    answer_prompt = get_answer_prompt(include_json_format=(not self.supports_structured_output(self.models[i])))
                     self.input_token_count += count_tokens(answer_prompt)
                     self.output_token_count += count_tokens(json.dumps(answer_dict))
                     if self.interactive:
@@ -191,15 +209,17 @@ class O1BaselineModel:
                         )
 
                 # Rank the generated answers
-                rank_answer_prompt = O1BaselinePrompts.get_rank_answer_prompt(self.thought_chain)
+                rank_answer_prompt = O1BaselinePrompts.get_rank_answer_prompt(thought_chain=self.thought_chain, include_json_format=(not self.supports_structured_output(self.ranking_model)))
                 answer_rank_dict = make_request_structured_output(
                     model=self.models[0],  # Using the first model for ranking
                     messages=[{"role": "user", "content": rank_answer_prompt}],
                     response_format=BaselineRank,
                     max_tokens=self.context_limit
                 )
-                chosen_answer_idx = BaselineRank(**answer_rank_dict).map_choice_to_number()
+                answer_rankings = BaselineRank(**answer_rank_dict).map_rankings_to_numbers()
+                chosen_answer_idx = answer_rankings[0]
                 thought.choose_answer(chosen_answer_idx)
+                thought.save_answer_rankings(answer_rankings)
                 self.input_token_count += count_tokens(rank_answer_prompt)
                 self.output_token_count += count_tokens(json.dumps(answer_rank_dict))
                 if self.interactive:
@@ -231,9 +251,11 @@ class O1BaselineModel:
             thought_data = {
                 'questions': thought.questions,
                 'role': thought.roles,
+                'question_rankings': thought.question_rankings,
                 'chosen_question_idx': thought.chosen_question_idx,
                 'chosen_question': thought.get_question(),
                 'answers': thought.answers,
+                'answer_rankings': thought.answer_rankings,
                 'chosen_answer_idx': thought.chosen_answer_idx,
                 'chosen_answer': thought.get_answer(),
             }
@@ -277,6 +299,8 @@ def initialize_models_from_jsonl(file_path: str) -> List[O1BaselineModel]:
                         thought.add_answer(answer)
                     thought.choose_question(thought_data['chosen_question_idx'])
                     thought.choose_answer(thought_data['chosen_answer_idx'])
+                    thought.save_question_rankings(thought_data['question_rankings'])
+                    thought.save_answer_rankings(thought_data['answer_rankings'])
                     thought_chain.add_thought(thought)
                 model = O1BaselineModel(
                     request_id=data['id'],

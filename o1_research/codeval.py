@@ -10,14 +10,15 @@ from demo.codegen import add_comma_to_newline, get_split_assert_statements
 from demo.codeval import get_code_template, run_code
 
 class CodeValMBPP:
-    def __init__(self, models: List[O1BaselineModel]):
+    def __init__(self, models: List[O1BaselineModel], section: str):
         self.models = models
         self.successful_models = []
+        self.section = section
 
     # Get a list of models that passes the unit tests
     def evaluate(self):
         dataset = load_dataset('google-research-datasets/mbpp')
-        test_dataset = dataset["test"]
+        test_dataset = dataset[self.section]
         df_all_test = test_dataset.to_pandas()
 
         df_test = []
@@ -71,14 +72,15 @@ class CodeValMBPP:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Evaluate MBPP code generation results')
-    parser.add_argument('--src_file', required=True, help='Source JSONL file containing models to evaluate')
+    parser.add_argument('--src_file', type=str, required=True, help='Source JSONL file containing models to evaluate')
+    parser.add_argument('--section', type=str, required=True, help='Section of the MBPP dataset (test or train)')
     
     args = parser.parse_args()
 
     tgt_file = args.src_file.replace(".jsonl", "_successful.jsonl")
     
     models = initialize_models_from_jsonl(f"./eval_results/{args.src_file}")
-    code_eval = CodeValMBPP(models)
+    code_eval = CodeValMBPP(models=models, section=args.section)
     code_eval.evaluate()
     code_eval.save_successful_models(f"./eval_results/{tgt_file}")
     eval_accuracy = code_eval.eval_accuracy()
