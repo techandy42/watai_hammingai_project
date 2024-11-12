@@ -13,6 +13,7 @@ class CodeValMBPP:
     def __init__(self, models: List[O1BaselineModel], section: str):
         self.models = models
         self.successful_models = []
+        self.failed_models = []
         self.section = section
 
     # Get a list of models that passes the unit tests
@@ -50,17 +51,29 @@ class CodeValMBPP:
         successful_request_ids = set(df_successful_test['request_id'])
 
         successful_models = []
-
+        failed_models = []
         for model in self.models:
             if model.request_id in successful_request_ids:
                 successful_models.append(model)
+            else:
+                failed_models.append(model)
 
         self.successful_models = successful_models
+        self.failed_models = failed_models
 
     # Save the list of successful models to a jsonl file
     def save_successful_models(self, file_path: str):
         results = []
         for model in self.successful_models:
+            results.append(model.save_result())
+
+        with open(file_path, 'w') as f:
+            for result in results:
+                f.write(json.dumps(result) + '\n')
+
+    def save_failed_models(self, file_path: str):
+        results = []
+        for model in self.failed_models:
             results.append(model.save_result())
 
         with open(file_path, 'w') as f:
@@ -77,11 +90,13 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    tgt_file = args.src_file.replace(".jsonl", "_successful.jsonl")
+    success_tgt_file = args.src_file.replace(".jsonl", "_successful.jsonl")
+    failed_tgt_file = args.src_file.replace(".jsonl", "_failed.jsonl")
     
     models = initialize_models_from_jsonl(f"./eval_results/{args.src_file}")
     code_eval = CodeValMBPP(models=models, section=args.section)
     code_eval.evaluate()
-    code_eval.save_successful_models(f"./eval_results/{tgt_file}")
+    code_eval.save_successful_models(f"./eval_results/{success_tgt_file}")
+    code_eval.save_failed_models(f"./eval_results/{failed_tgt_file}")
     eval_accuracy = code_eval.eval_accuracy()
     print(f"Accuracy: {eval_accuracy*100:.2f}%")

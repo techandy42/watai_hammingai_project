@@ -48,5 +48,6 @@
 
 - MapCoder (o1-mini): `93.20%`
 - Monte Carlo Search Tree (o1-mini): `82.30%`
-- GPT-4o Mini: `61.00%`
-- O1BaselineModel (GPT-4o Mini): `59.80%`
+- O1BaselineModel (Hybrid: gpt-4o, claude-3.5-sonnet, gemini-1.5-pro, command-r-plus): `62.53%`
+- gpt-4o-mini: `61.00%`
+- O1BaselineModel (gpt-4o-mini): `59.80%`
