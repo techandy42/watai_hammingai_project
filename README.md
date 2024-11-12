@@ -44,7 +44,9 @@
 
 ### Test Results
 
-> MBPP
+> MBPP Leaderboard
 
+- MapCoder (o1-mini): `93.20%`
+- Monte Carlo Search Tree (o1-mini): `82.30%`
 - GPT-4o Mini: `61.00%`
 - O1BaselineModel (GPT-4o Mini): `59.80%`
