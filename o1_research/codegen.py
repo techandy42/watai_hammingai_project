@@ -1,3 +1,4 @@
+import argparse
 import time
 import logging
 import json
@@ -36,14 +37,20 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None, range: Optional[
     df_test["codegen_prompt"] = df_test.apply(get_codegen_prompt, axis=1)
 
     system_message = "Only include Python code in your output, do not include any comments or tags."
-    base_model = "gpt-4o-mini-2024-07-18"
-    context_limit = 8192
-    token_limit = 8192
+    models = [
+        "gpt-4o-2024-08-06", # $2.5/1M input, $10/1M output
+        "claude-3-5-sonnet-20240620", # $3/1M input, $15/1M output
+        "gemini/gemini-1.5-pro", # $1.25/1M input, $5/1M output
+        "command-r-plus-08-2024" # $2.5/1M input, $10/1M output
+    ]
+    ranking_model = "gpt-4o-2024-08-06"
+    context_limit = 4096
+    token_limit = 4096
     interactive = False
     total_input_token_count = 0
     total_output_token_count = 0
-    price_per_mill_input = 0.15
-    price_per_mill_output = 0.6
+    price_per_mill_input = (2.5 + 3 + 1.25 + 2.5) / 4
+    price_per_mill_output = (10 + 15 + 5 + 10) / 4
 
     results = []
 
@@ -53,7 +60,8 @@ def run_mbpp(file_path: str, num_threads: Optional[int] = None, range: Optional[
         initial_question = row['codegen_prompt']
         model = O1BaselineModel(
             request_id=request_id,
-            base_model=base_model,
+            models=models,
+            ranking_model=ranking_model,
             context_limit=context_limit,
             token_limit=token_limit,
             initial_question=initial_question,
@@ -106,6 +114,17 @@ def merge_and_sort_jsonl(file_paths, output_file):
 
 # Example
 if __name__ == "__main__":
-    range = (0, 1)
-    file_path = f"mbpp_results_{range[0]}_to_{range[1]-1}.jsonl"
+    parser = argparse.ArgumentParser(description='Run MBPP evaluation')
+    parser.add_argument('--start', type=int, help='Start index (required if --end is provided)')
+    parser.add_argument('--end', type=int, help='End index (required if --start is provided)')
+    parser.add_argument('--version', type=str, help='Optional version prefix for the output file')
+    
+    args = parser.parse_args()
+    
+    if (args.start is None) != (args.end is None):
+        parser.error("Both --start and --end must be provided together")
+    
+    range = None if args.start is None else (args.start, args.end)
+    prefix = f"{args.version}_" if args.version else ""
+    file_path = f"eval_results/{prefix}mbpp_results_{range[0]}_to_{range[1]-1}.jsonl"
     run_mbpp(file_path=file_path, range=range)

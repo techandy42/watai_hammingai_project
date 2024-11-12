@@ -46,5 +46,6 @@
 
 > MBPP
 
-- GPT-4o Mini (Basic Structure Guide): `61.00%`
-- O1Baseline (GPT-4o Mini) (Basic Structure Guide): `59.80%`
+- GPT-4o Mini: `61.00%`
+- O1BaselineModel (GPT-4o Mini): `59.80%`
+- O1BaselineModel (Hybrid) (MBPP-10%): `56.25%`
