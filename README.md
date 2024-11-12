@@ -40,7 +40,26 @@
 
 ### o1 Research
 
+Contains research work for reverse-engineering internal-reasoning models such as the o1 models.
+
+> Working with the codebase
+
 - Run `python3 model.py` to run the baseline reverse-engineered o1 model.
+- Create a directory called `eval_results` under `/o1_research` before running the following commands.
+- Run the following command to run the baseline model on MBPP train/test datasets.
+```
+!python3 codegen.py \
+    --start <start_index> \
+    --end <end_index> \
+    --section <optional-section> \
+    --version <optional-version>
+```
+- Run the folllowing command to evaluate the results stored under `/o1_research/eval_results` directory.
+```
+!python3 codeval.py \
+    --src_file <src_file> \
+    --section <section>
+```
 
 ### Test Results
 
