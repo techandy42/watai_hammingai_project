@@ -318,7 +318,8 @@ def initialize_models_from_jsonl(file_path: str) -> List[O1BaselineModel]:
                 logging.error(f"Error initializing model from JSONL: {e}")
     return models
 
-if __name__ == "__main__":
+# Run model
+def main():
     request_id = "test_1"
     initial_question = "Write a python function to find the first repeated character in a given string."
     system_message = "Only include Python code in your output, do not include any comments or tags."
@@ -366,3 +367,6 @@ if __name__ == "__main__":
     print("Final Response:")
     print(response)
     print("=" * 100)
+
+if __name__ == "__main__":
+    main()

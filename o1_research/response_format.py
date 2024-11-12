@@ -58,8 +58,8 @@ class BaselineRank(BaseModel):
     def map_rankings_to_numbers(self) -> List[int]:
         return [self.choice_mapping[self.best], self.choice_mapping[self.second], self.choice_mapping[self.third], self.choice_mapping[self.worst]]
 
-# Example Usage:
-if __name__ == "__main__":
+# Run test cases
+def main():
     # BaselineQuestion
     question_data = {
         "question": "What is your favorite color?",
@@ -82,3 +82,6 @@ if __name__ == "__main__":
     }
     print(BaselineRank.is_valid(rank_data))  # Output: True
     print(BaselineRank(**rank_data).map_rankings_to_numbers())  # Output: [0, 1, 2, 3]
+
+if __name__ == "__main__":
+    main()

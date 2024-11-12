@@ -27,7 +27,8 @@ def calc_cost(read_cost: float, write_cost: float, additional_input: int = 0,
     estimated_cost = (total_read_token_count / 1_000_000) * read_cost + (total_write_token_count / 1_000_000) * write_cost
     return total_read_token_count, total_write_token_count, estimated_cost
 
-if __name__ == "__main__":
+# Run calculate cost
+def main():
     MODEL_NAME = "o1-mini-2024-09-12"
     READ_COST = 3.00
     WRITE_COST = 12.00
@@ -42,3 +43,6 @@ if __name__ == "__main__":
     print(f"Model: {MODEL_NAME}")
     print(f"Read: {read_token_count} tokens / Write: {write_token_count} tokens")
     print(f"Cost: ${estimated_cost:.2f} USD")
+
+if __name__ == "__main__":
+    main()

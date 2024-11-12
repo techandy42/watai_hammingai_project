@@ -391,8 +391,8 @@ class O1BaselinePrompts:
 
         return prompt
 
-
-if __name__ == "__main__":
+# Run test cases
+def main():
     # Test 1: get_initial_question_prompt
     thought_chain_1 = ThoughtChain(initial_question="What is 2 + 2?")
     initial_prompt_1 = O1BaselinePrompts.get_initial_question_prompt(thought_chain_1, include_json_format=True)
@@ -472,3 +472,6 @@ if __name__ == "__main__":
     rank_answer_prompt = O1BaselinePrompts.get_rank_answer_prompt(thought_chain_3, include_json_format=True)
     print("\nTest 7: Rank Answer Prompt")
     print(rank_answer_prompt)
+
+if __name__ == "__main__":
+    main()

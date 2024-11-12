@@ -1,7 +1,8 @@
+import argparse
 import ast 
 import concurrent.futures
 from tqdm import tqdm
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from pydantic import BaseModel
 from datasets import load_dataset
 from demo.helpers import remove_python_code_tags, split_assert_statements
@@ -95,12 +96,15 @@ def get_io_struct_prompt(row):
     io_struct_prompt = CodegenPrompts.get_io_struct_extraction_prompt_markdown(combined_test_list)
     return io_struct_prompt
 
-def run_codegen(num_threads: Optional[int] = None):
+def run_codegen(file_path: str, section: str, num_threads: Optional[int] = None, range: Optional[Tuple[int, int]] = None):
     extraction_model = "gpt-4o-mini-2024-07-18"
     codegen_model = "gpt-4o-mini-2024-07-18"
     dataset = load_dataset('google-research-datasets/mbpp')
-    test_dataset = dataset["test"]
+    test_dataset = dataset[section]
     df_test = test_dataset.to_pandas()
+    if range is None:
+        range = (0, len(df_test)+1)
+    df_test = df_test.iloc[range[0]:range[1]]
 
     df_test["test_list"] = df_test.apply(add_comma_to_newline, axis=1, column_name="test_list")
     df_test["challenge_test_list"] = df_test.apply(add_comma_to_newline, axis=1, column_name="challenge_test_list")
@@ -129,12 +133,21 @@ def run_codegen(num_threads: Optional[int] = None):
         pred_codes = list(tqdm(executor.map(lambda row: get_pred_code(row, codegen_model), rows), total=len(rows)))
     df_test["pred_code"] = pred_codes
 
-    return df_test
+    df_test.to_json(file_path, orient='records', lines=True)
 
 def main():
-    df_test = run_codegen()
-    file_path = "mbpp_hammingai.csv"
-    df_test.to_csv(file_path, index=False)
+    parser = argparse.ArgumentParser(description='Run MBPP evaluation')
+    parser.add_argument('--start', type=int, required=True, help='Start index (inclusive)')
+    parser.add_argument('--end', type=int, required=True, help='End index (exclusive)')
+    parser.add_argument('--section', type=str, default="test", help='Optional section of the MBPP dataset (test or train, defaults to test)')
+    parser.add_argument('--version', type=str, help='Optional version prefix for the output file')
+
+    args = parser.parse_args()
+
+    range = None if args.start is None else (args.start, args.end)
+    prefix = f"{args.version}_" if args.version else ""
+    file_path = f"eval_results/{prefix}mbpp_results_{range[0]}_to_{range[1]-1}.jsonl"
+    run_codegen(file_path=file_path, section=args.section, range=range)
 
 if __name__ == "__main__":
     main()

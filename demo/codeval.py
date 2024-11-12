@@ -1,5 +1,5 @@
+import argparse
 import pandas as pd
-import ast
 from tqdm import tqdm
 from typing import Tuple
 from demo.prompts import CodevalTemplates
@@ -17,9 +17,7 @@ def run_code(row):
     return stdout_lines, status_code
 
 def run_codeval(file_path: str) -> Tuple[pd.DataFrame, float]:
-    df_test = pd.read_csv(file_path)
-    df_test["test_list"] = df_test['test_list'].apply(ast.literal_eval)
-    df_test["challenge_test_list"] = df_test['challenge_test_list'].apply(ast.literal_eval)
+    df_test = pd.read_json(file_path, orient='records', lines=True)
     df_test["code_template"] = df_test.apply(get_code_template, axis=1)
     print("Running unit tests...")
     df_test[['stdout_lines', 'status_code']] = df_test.progress_apply(run_code, axis=1, result_type="expand")
@@ -29,10 +27,14 @@ def run_codeval(file_path: str) -> Tuple[pd.DataFrame, float]:
     return df_test, accuracy
 
 def main():
-    input_file_path = "mbpp_hammingai.csv"
-    output_file_path = "mbpp_hammingai_validated.csv"
-    df_test, accuracy = run_codeval(input_file_path)
-    df_test.to_csv(output_file_path, index=False)
+    parser = argparse.ArgumentParser(description='Evaluate MBPP code generation results')
+    parser.add_argument('--src_file', type=str, required=True, help='Source JSONL file containing models to evaluate')
+    
+    args = parser.parse_args()
+
+    tgt_file = args.src_file.replace(".jsonl", "_validated.jsonl")
+    df_test, accuracy = run_codeval(f"./eval_results/{args.src_file}")
+    df_test.to_json(f"./eval_results/{tgt_file}", orient='records', lines=True)
     print(f"Accuracy: {accuracy*100:.2f}")
 
 if __name__ == "__main__":

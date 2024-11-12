@@ -2,4 +2,5 @@
 .env
 local_notebooks/
 watai_hammingai_project.egg-info/
+demo/eval_results/
 o1_research/eval_results/

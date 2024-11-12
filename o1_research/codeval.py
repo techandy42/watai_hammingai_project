@@ -83,7 +83,8 @@ class CodeValMBPP:
     def eval_accuracy(self) -> float:
         return len(self.successful_models) / len(self.models)
 
-if __name__ == "__main__":
+# Run codeval
+def main():
     parser = argparse.ArgumentParser(description='Evaluate MBPP code generation results')
     parser.add_argument('--src_file', type=str, required=True, help='Source JSONL file containing models to evaluate')
     parser.add_argument('--section', type=str, required=True, help='Section of the MBPP dataset (test or train)')
@@ -100,3 +101,6 @@ if __name__ == "__main__":
     code_eval.save_failed_models(f"./eval_results/{failed_tgt_file}")
     eval_accuracy = code_eval.eval_accuracy()
     print(f"Accuracy: {eval_accuracy*100:.2f}%")
+
+if __name__ == "__main__":
+    main()
