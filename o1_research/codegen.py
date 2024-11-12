@@ -112,8 +112,8 @@ def merge_and_sort_jsonl(file_paths, output_file):
         for item in sorted_data:
             out_f.write(json.dumps(item) + '\n')
 
-# Example
-if __name__ == "__main__":
+# Run codegen
+def main():
     parser = argparse.ArgumentParser(description='Run MBPP evaluation')
     parser.add_argument('--start', type=int, required=True, help='Start index (inclusive)')
     parser.add_argument('--end', type=int, required=True, help='End index (exclusive)')
@@ -126,3 +126,6 @@ if __name__ == "__main__":
     prefix = f"{args.version}_" if args.version else ""
     file_path = f"eval_results/{prefix}mbpp_results_{range[0]}_to_{range[1]-1}.jsonl"
     run_mbpp(file_path=file_path, section=args.section, range=range)
+
+if __name__ == "__main__":
+    main()

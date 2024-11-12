@@ -34,9 +34,22 @@
 
 ### Demo (MBPP)
 
-- Demo code for generating code for MBPP benchmark and testing the code against the provided unit tests.
-- Run `python3 codegen.py` to generate code for the MBPP benchmark. (stores output in `mbpp_hammingai.csv`)
-- Run `python3 codeval.py` to validate the code against the unit tests. (stores output in `mbpp_hammingai_validated.csv`)
+- Codebase for running code-generation on MBPP benchmark and evaluating the results against the unit tests.
+- Create a directory called `eval_results` under `/demo` before running the following commands.
+- Navigate to `/demo` directory: `!cd demo`.
+- Run the following command to run the `gpt-4o-mini` on MBPP train/test datasets (you can change the model in the source code).
+```
+!python3 codegen.py \
+    --start <start_index> \ # Row index to start from (inclusive)
+    --end <end_index> \ # Row index to end at (exclusive)
+    --section <optional-section> \ # Optional section of the MBPP dataset (test or train, defaults to test)
+    --version <optional-version> # Optional version prefix for the output file
+```
+- Run the folllowing command to evaluate the results stored under `/demo/eval_results` directory.
+```
+!python3 codeval.py \
+    --src_file <src_file> \ # Source JSONL file containing models to evaluate
+```
 
 ### o1 Research
 
@@ -46,19 +59,20 @@ Contains research work for reverse-engineering internal-reasoning models such as
 
 - Run `python3 model.py` to run the baseline reverse-engineered o1 model.
 - Create a directory called `eval_results` under `/o1_research` before running the following commands.
+- Navigate to `/o1_research` directory: `!cd o1_research`.
 - Run the following command to run the baseline model on MBPP train/test datasets.
 ```
 !python3 codegen.py \
-    --start <start_index> \
-    --end <end_index> \
-    --section <optional-section> \
-    --version <optional-version>
+    --start <start_index> \ # Row index to start from (inclusive)
+    --end <end_index> \ # Row index to end at (exclusive)
+    --section <optional-section> \ # Optional section of the MBPP dataset (test or train, defaults to test)
+    --version <optional-version> # Optional version prefix for the output file
 ```
 - Run the folllowing command to evaluate the results stored under `/o1_research/eval_results` directory.
 ```
 !python3 codeval.py \
-    --src_file <src_file> \
-    --section <section>
+    --src_file <src_file> \ # Source JSONL file containing models to evaluate
+    --section <section> # Section of the MBPP dataset (test or train)
 ```
 
 ### Test Results
