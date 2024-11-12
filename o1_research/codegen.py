@@ -12,11 +12,11 @@ from demo.codegen import get_io_struct, get_io_struct_prompt, get_codegen_prompt
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-def run_mbpp(file_path: str, num_threads: Optional[int] = None, range: Optional[Tuple[int, int]] = None):
+def run_mbpp(file_path: str, section: str, num_threads: Optional[int] = None, range: Optional[Tuple[int, int]] = None):
     start_time = time.time()
 
     dataset = load_dataset('google-research-datasets/mbpp')
-    test_dataset = dataset["test"]
+    test_dataset = dataset[section]
     df_test = test_dataset.to_pandas()
     if range is None:
         range = (0, len(df_test)+1)
@@ -115,16 +115,14 @@ def merge_and_sort_jsonl(file_paths, output_file):
 # Example
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run MBPP evaluation')
-    parser.add_argument('--start', type=int, help='Start index (required if --end is provided)')
-    parser.add_argument('--end', type=int, help='End index (required if --start is provided)')
+    parser.add_argument('--start', type=int, required=True, help='Start index (inclusive)')
+    parser.add_argument('--end', type=int, required=True, help='End index (exclusive)')
+    parser.add_argument('--section', type=str, default="test", help='Optional section of the MBPP dataset (test or train, defaults to test)')
     parser.add_argument('--version', type=str, help='Optional version prefix for the output file')
-    
+
     args = parser.parse_args()
-    
-    if (args.start is None) != (args.end is None):
-        parser.error("Both --start and --end must be provided together")
-    
+
     range = None if args.start is None else (args.start, args.end)
     prefix = f"{args.version}_" if args.version else ""
     file_path = f"eval_results/{prefix}mbpp_results_{range[0]}_to_{range[1]-1}.jsonl"
-    run_mbpp(file_path=file_path, range=range)
+    run_mbpp(file_path=file_path, section=args.section, range=range)

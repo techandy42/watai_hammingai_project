@@ -3,7 +3,17 @@ from o1_research.thought_chain import Thought, ThoughtChain
 
 class O1BaselinePrompts:
     @staticmethod
-    def get_initial_question_prompt(thought_chain: ThoughtChain) -> str:
+    def get_initial_question_prompt(thought_chain: ThoughtChain, include_json_format: bool) -> str:
+        json_format = """
+        \"\"\"
+        Output Format (JSON):
+        {
+            "question": str,
+            "role": Literal["internal", "external"]
+        }
+        \"\"\"
+        """
+        
         prompt = f"""
         Instruction:
         \"\"\"
@@ -14,7 +24,7 @@ class O1BaselinePrompts:
         - "question": Your question.
         - "role": "internal" (if you are asking for the first step of reasoning) or "external" (if you are asking to directly solve the problem).
         \"\"\"
-
+        {json_format if include_json_format else ""}
         Example:
         \"\"\"
         - Problem: ... some complex coding question ...
@@ -30,7 +40,17 @@ class O1BaselinePrompts:
         return format_prompt(prompt)
     
     @staticmethod
-    def get_followup_question_prompt(thought_chain: ThoughtChain) -> str:
+    def get_followup_question_prompt(thought_chain: ThoughtChain, include_json_format: bool) -> str:
+        json_format = """
+        \"\"\"
+        Output Format (JSON):
+        {
+            "question": str,
+            "role": Literal["internal", "external"]
+        }
+        \"\"\"
+        """
+        
         prompt = f"""
         Instruction:
         \"\"\"
@@ -42,7 +62,7 @@ class O1BaselinePrompts:
         - "question": Your question.
         - "role": "internal" (if you are asking for the next step of reasoning) or "external" (if you are asking to finally solve the problem).
         \"\"\"
-        
+        {json_format if include_json_format else ""}
         Example No.1:
         \"\"\"
         - Problem: ... some complex coding question ...
@@ -79,7 +99,16 @@ class O1BaselinePrompts:
         return prompt
     
     @staticmethod
-    def get_internal_answer_prompt(thought_chain: ThoughtChain) -> str:
+    def get_internal_answer_prompt(thought_chain: ThoughtChain, include_json_format: bool) -> str:
+        json_format = """
+        \"\"\"
+        Output Format (JSON):
+        {
+            "answer": str
+        }
+        \"\"\"
+        """
+
         prompt = f"""
         Instruction:
         \"\"\"
@@ -89,7 +118,7 @@ class O1BaselinePrompts:
         - If you are unsure about the answer, indicate in your response that you are unsure.
         - "answer": Your answer.
         \"\"\"
-
+        {json_format if include_json_format else ""}
         Initial Problem Statement:
         \"\"\"
         {thought_chain.initial_question}
@@ -122,7 +151,16 @@ class O1BaselinePrompts:
         return prompt
     
     @staticmethod
-    def get_external_answer_prompt(thought_chain: ThoughtChain) -> str:
+    def get_external_answer_prompt(thought_chain: ThoughtChain, include_json_format: bool) -> str:
+        json_format = """
+        \"\"\"
+        Output Format (JSON):
+        {
+            "answer": str
+        }
+        \"\"\"
+        """
+
         prompt = f"""
         Instruction:
         \"\"\"
@@ -131,7 +169,7 @@ class O1BaselinePrompts:
         - Only return one answer, and make sure to not include anything else in your output.
         - "answer": Your answer.
         \"\"\"
-
+        {json_format if include_json_format else ""}
         Initial Problem Statement:
         \"\"\"
         {thought_chain.initial_question}
@@ -164,7 +202,16 @@ class O1BaselinePrompts:
         return prompt
     
     @staticmethod
-    def get_external_answer_system_message_prompt(thought_chain: ThoughtChain) -> str:
+    def get_external_answer_system_message_prompt(thought_chain: ThoughtChain, include_json_format: bool) -> str:
+        json_format = """
+        \"\"\"
+        Output Format (JSON):
+        {
+            "answer": str
+        }
+        \"\"\"
+        """
+
         prompt = f"""
         Instruction:
         \"\"\"
@@ -174,7 +221,7 @@ class O1BaselinePrompts:
         - Reference the system message for the specification for your answer for the current question.
         - "answer": Your answer.
         \"\"\"
-
+        {json_format if include_json_format else ""}
         Initial Problem Statement:
         \"\"\"
         {thought_chain.initial_question}
@@ -212,19 +259,34 @@ class O1BaselinePrompts:
         return prompt
 
     @staticmethod
-    def get_rank_question_prompt(thought_chain: Thought) -> str:
+    def get_rank_question_prompt(thought_chain: Thought, include_json_format: bool) -> str:
+        json_format = """
+        \"\"\"
+        Output Format (JSON):
+        {
+            "best": Literal["a", "b", "c", "d"],
+            "second": Literal["a", "b", "c", "d"],
+            "third": Literal["a", "b", "c", "d"],
+            "worst": Literal["a", "b", "c", "d"]
+        }
+        \"\"\"
+        """
+
         prompt = f"""
         Instruction:
         \"\"\"
         - The following are the initial problem statement, the previous steps of reasoning, and the current questions.
         - The current questions that ask to solve the initial problem statement using the previous steps of reasoning are listed below with labels: a, b, c, d
-        - Return the label of the current question that you think is the most important to ask next.
+        - Return the rank of the labels of the current questions in order of best to worst, where "best" is the best question, "second" is the second best question, "third" is the third best question, and "worst" is the worst question.
         - During your judgement, consider the role of each question.
             - You should favor a question with (role: internal) if you think there needs to be additional steps of reasoning to the solve the initial problem statement.
             - Otherwise, you should favor a question with (role: external) if you think the problem is very simple, or the previous steps of reasoning provide enough information to solve the initial problem statement. 
-        - "choice": "a", "b", "c", or "d" (only one of the following labels)
+        - "best": "a", "b", "c", or "d" (only one of the following labels)
+        - "second": "a", "b", "c", or "d" (only one of the following labels)
+        - "third": "a", "b", "c", or "d" (only one of the following labels)
+        - "worst": "a", "b", "c", or "d" (only one of the following labels)
         \"\"\"
-
+        {json_format if include_json_format else ""}
         Initial Problem Statement:
         \"\"\"
         {thought_chain.initial_question}
@@ -260,16 +322,31 @@ class O1BaselinePrompts:
         return prompt
 
     @staticmethod
-    def get_rank_answer_prompt(thought_chain: Thought) -> str:
+    def get_rank_answer_prompt(thought_chain: Thought, include_json_format: bool) -> str:
+        json_format = """
+        \"\"\"
+        Output Format (JSON):
+        {
+            "best": Literal["a", "b", "c", "d"],
+            "second": Literal["a", "b", "c", "d"],
+            "third": Literal["a", "b", "c", "d"],
+            "worst": Literal["a", "b", "c", "d"]
+        }
+        \"\"\"
+        """
+
         prompt = f"""
         Instruction:
         \"\"\"
         - The following are the initial problem statement, the previous steps of reasoning, the current question, and the current answers to the current question.
         - The current answers that aim to answer the current question are listed below with labels: a, b, c, d
-        - Return the label of the current answer that you think most adequately answers the current question.
-        - "choice": "a", "b", "c", or "d" (only one of the following labels)
+        - Return the rank of the labels of the current answers in order of best to worst, where "best" is the best answer, "second" is the second best answer, "third" is the third best answer, and "worst" is the worst answer.
+        - "best": "a", "b", "c", or "d" (only one of the following labels)
+        - "second": "a", "b", "c", or "d" (only one of the following labels)
+        - "third": "a", "b", "c", or "d" (only one of the following labels)
+        - "worst": "a", "b", "c", or "d" (only one of the following labels)
         \"\"\"
-
+        {json_format if include_json_format else ""}
         Initial Problem Statement:
         \"\"\"
         {thought_chain.initial_question}
@@ -318,7 +395,7 @@ class O1BaselinePrompts:
 if __name__ == "__main__":
     # Test 1: get_initial_question_prompt
     thought_chain_1 = ThoughtChain(initial_question="What is 2 + 2?")
-    initial_prompt_1 = O1BaselinePrompts.get_initial_question_prompt(thought_chain_1)
+    initial_prompt_1 = O1BaselinePrompts.get_initial_question_prompt(thought_chain_1, include_json_format=True)
     print("Test 1: Initial Question Prompt")
     print(initial_prompt_1)
 
@@ -331,7 +408,7 @@ if __name__ == "__main__":
     thought_1.choose_question(0)
     thought_1.choose_answer(0)
     thought_chain_2.add_thought(thought_1)
-    question_prompt_2 = O1BaselinePrompts.get_followup_question_prompt(thought_chain_2)
+    question_prompt_2 = O1BaselinePrompts.get_followup_question_prompt(thought_chain_2, include_json_format=True)
     print("\nTest 2: Follow-up Question Prompt with One Thought")
     print(question_prompt_2)
 
@@ -355,17 +432,17 @@ if __name__ == "__main__":
     thought_chain_3.add_thought(thought_2)
     thought_chain_3.add_thought(thought_3)
     
-    question_prompt_3 = O1BaselinePrompts.get_followup_question_prompt(thought_chain_3)
+    question_prompt_3 = O1BaselinePrompts.get_followup_question_prompt(thought_chain_3, include_json_format=True)
     print("\nTest 3: Follow-up Question Prompt with Two Thoughts")
     print(question_prompt_3)
 
     # Test 4: get_internal_answer_prompt
-    internal_answer_prompt = O1BaselinePrompts.get_internal_answer_prompt(thought_chain_3)
+    internal_answer_prompt = O1BaselinePrompts.get_internal_answer_prompt(thought_chain_3, include_json_format=True)
     print("\nTest 4: Internal Answer Prompt")
     print(internal_answer_prompt)
 
     # Test 5: get_external_answer_system_message_prompt
-    external_answer_prompt = O1BaselinePrompts.get_external_answer_system_message_prompt(thought_chain_3)
+    external_answer_prompt = O1BaselinePrompts.get_external_answer_system_message_prompt(thought_chain_3, include_json_format=True)
     print("\nTest 5: External Answer Prompt (System Message)")
     print(external_answer_prompt)
 
@@ -382,7 +459,7 @@ if __name__ == "__main__":
     thought_chain_3.chain[-1].add_question("Can Strassen's algorithm be applied?")
     thought_chain_3.chain[-1].add_role(Thought.external)
     
-    rank_question_prompt = O1BaselinePrompts.get_rank_question_prompt(thought_chain_3)
+    rank_question_prompt = O1BaselinePrompts.get_rank_question_prompt(thought_chain_3, include_json_format=True)
     print("\nTest 6: Rank Question Prompt")
     print(rank_question_prompt)
 
@@ -392,6 +469,6 @@ if __name__ == "__main__":
     thought_chain_3.chain[-1].add_answer("Answer C")
     thought_chain_3.chain[-1].add_answer("Answer D")
     
-    rank_answer_prompt = O1BaselinePrompts.get_rank_answer_prompt(thought_chain_3)
+    rank_answer_prompt = O1BaselinePrompts.get_rank_answer_prompt(thought_chain_3, include_json_format=True)
     print("\nTest 7: Rank Answer Prompt")
     print(rank_answer_prompt)

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict, ClassVar
+from typing import Any, Dict, ClassVar, List
 from pydantic import BaseModel, ValidationError
 
 class RoleEnum(str, Enum):
@@ -36,7 +36,10 @@ class BaselineAnswer(BaseModel):
             return False
 
 class BaselineRank(BaseModel):
-    choice: ChoiceEnum
+    best: ChoiceEnum
+    second: ChoiceEnum
+    third: ChoiceEnum
+    worst: ChoiceEnum
     choice_mapping: ClassVar[Dict[str, int]] = {
         "a": 0,
         "b": 1,
@@ -52,8 +55,8 @@ class BaselineRank(BaseModel):
         except ValidationError:
             return False
 
-    def map_choice_to_number(self) -> int:
-        return self.choice_mapping[self.choice]
+    def map_rankings_to_numbers(self) -> List[int]:
+        return [self.choice_mapping[self.best], self.choice_mapping[self.second], self.choice_mapping[self.third], self.choice_mapping[self.worst]]
 
 # Example Usage:
 if __name__ == "__main__":
@@ -72,8 +75,10 @@ if __name__ == "__main__":
 
     # BaselineRank
     rank_data = {
-        "choice": "b"
+        "best": "c",
+        "second": "a",
+        "third": "b",
+        "worst": "d"
     }
-    if BaselineRank.is_valid(rank_data):
-        rank = BaselineRank(**rank_data)
-        print(rank.map_choice_to_number())  # Output: 1
+    print(BaselineRank.is_valid(rank_data))  # Output: True
+    print(BaselineRank(**rank_data).map_rankings_to_numbers())  # Output: [0, 1, 2, 3]

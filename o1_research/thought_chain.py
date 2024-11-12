@@ -11,6 +11,8 @@ class Thought:
         self.answers = []
         self.chosen_question_idx = None
         self.chosen_answer_idx = None
+        self.question_rankings = []
+        self.answer_rankings = []
 
     def add_question(self, question: str) -> None:
         self.questions.append(question)
@@ -30,6 +32,12 @@ class Thought:
         if idx >= len(self.answers):
             return False
         self.chosen_answer_idx = idx
+
+    def save_question_rankings(self, rankings: List[int]) -> None:
+        self.question_rankings = rankings
+
+    def save_answer_rankings(self, rankings: List[int]) -> None:
+        self.answer_rankings = rankings
 
     def get_question(self) -> Optional[str]:
         if self.chosen_question_idx is None:
