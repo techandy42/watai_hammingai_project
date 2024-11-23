@@ -89,6 +89,6 @@ def train_reward_model(pairwise_data, model_name='bert-base-uncased'):
     model.save_pretrained('./reward_model')
     tokenizer.save_pretrained('./reward_model')
 
-pairwise_data = generate_pairwise_data('hybrid_test_mbpp_results_0_to_49_successful.jsonl')
+pairwise_data = generate_pairwise_data('hybrid_train/hybrid_train_mbpp_results_successful.jsonl')
 
 train_reward_model(pairwise_data, model_name='bert-base-uncased')

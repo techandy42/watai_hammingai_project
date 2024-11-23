@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 # dataset
-dataset_path = 'hybrid_test_mbpp_results_0_to_49_successful.jsonl'
+dataset_path = 'hybrid_test/hybrid_test_mbpp_results_successful.jsonl'
 
 # load
 reward_model_name = './reward_model'  
