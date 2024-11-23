@@ -75,6 +75,13 @@ Contains research work for reverse-engineering internal-reasoning models such as
     --section <section> # Section of the MBPP dataset (test or train)
 ```
 
+### o1 Research - Custom Reward Model
+
+- `accuracy_test.py`: script for evaluating model accuracy across a defined set of test cases
+- `new_model.py`: new model.py with the reward model implementation
+- `simple_testing.py`: lightweight script for running basic tests on the model to verify outputs quickly
+- `train_reward_model.py`: script for training the reward model
+
 ### Test Results
 
 > MBPP Leaderboard
