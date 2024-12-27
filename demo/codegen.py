@@ -5,9 +5,9 @@ from tqdm import tqdm
 from typing import Optional, List, Tuple
 from pydantic import BaseModel
 from datasets import load_dataset
-from demo.helpers import remove_python_code_tags, split_assert_statements
-from demo.request import make_request, make_request_structured_output
-from demo.prompts import CodegenPrompts
+from helpers import remove_python_code_tags, split_assert_statements
+from request import make_request, make_request_structured_output
+from prompts import CodegenPrompts
 
 def get_codegen_prompt(row):
     text = row["text"]
