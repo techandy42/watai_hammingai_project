@@ -1,6 +1,7 @@
 import json
 from openai import OpenAI
 import os
+from tqdm import tqdm  # Import tqdm for the progress bar
 
 client = OpenAI(
     # defaults to os.environ.get("OPENAI_API_KEY")
@@ -31,7 +32,8 @@ def test_llm_on_jsonl(jsonl_file, model="gpt-4", temperature=0.0):
     correct_predictions = 0
     total_predictions = len(data)
 
-    for item in data:
+    # Wrap the iteration with tqdm for a progress bar
+    for item in tqdm(data, desc="Testing LLM", unit="sample"):
         code = item['code']
         correct_func_name = item['func_error']
         
@@ -63,6 +65,4 @@ def test_llm_on_jsonl(jsonl_file, model="gpt-4", temperature=0.0):
 # Example usage:
 # Test the model with the generated results from `results.jsonl`
 jsonl_file = 'bug_in_codestack_dataset.jsonl'  # Make sure to specify your jsonl file here
-# openai.api_key = os.getenv('OPENAI_API_KEY')  # Assuming the API key is set in the environment
-
 accuracy = test_llm_on_jsonl(jsonl_file)
