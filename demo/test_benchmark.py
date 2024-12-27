@@ -22,7 +22,7 @@ The following is a code sample. One of the functions in this code contains a bug
 
 {code}
 
-Please return the name of the function containing the bug.
+Please return the name of the function containing the bug, nothing else. If there is no bug, return 'none'.
 """
 
 # Test LLM on the jsonl data
@@ -52,7 +52,7 @@ def test_llm_on_jsonl(jsonl_file, model="gpt-4", temperature=0.0):
         predicted_func_name = response.choices[0].message.content.strip()
 
         # Check if the predicted function name matches the correct one
-        if predicted_func_name == correct_func_name:
+        if correct_func_name and correct_func_name in predicted_func_name:
             correct_predictions += 1
 
     # Calculate accuracy
