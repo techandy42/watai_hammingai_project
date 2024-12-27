@@ -1,4 +1,5 @@
 import json
+import os
 import openai  # Replace with the LLM provider you're using, e.g., OpenAI, Hugging Face, etc.
 
 # Load the jsonl file
@@ -55,7 +56,7 @@ def test_llm_on_jsonl(jsonl_file, model="gpt-4", temperature=0.0):
 
 # Example usage:
 # Test the model with the generated results from `results.jsonl`
-jsonl_file = 'results.jsonl'  # Make sure to specify your jsonl file here
-openai.api_key = 'your-api-key-here'  # Replace with your OpenAI API key
+jsonl_file = 'bug_in_codestack_dataset.jsonl'  # Make sure to specify your jsonl file here
+openai.api_key = os.getenv('OPENAI_API_KEY')  # Replace with your OpenAI API key
 
 accuracy = test_llm_on_jsonl(jsonl_file)
