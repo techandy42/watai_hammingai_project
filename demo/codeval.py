@@ -5,6 +5,7 @@ from typing import Tuple
 from prompts import CodevalTemplates
 from process import run_python_code
 import re
+import ast
 from datasets import load_dataset
 import random
 import json
@@ -31,7 +32,10 @@ def run_code(row):
     return stdout_lines, status_code, error_funcs
 
 def run_codeval(file_path: str) -> Tuple[pd.DataFrame, float]:
-    df_test = pd.read_json(file_path, orient='records', lines=True)
+    # df_test = pd.read_json(file_path, orient='records', lines=True)
+    df_test = pd.read_csv(file_path)
+    df_test["test_list"] = df_test['test_list'].apply(ast.literal_eval)
+    df_test["challenge_test_list"] = df_test['challenge_test_list'].apply(ast.literal_eval)
     df_test["code_template"] = df_test.apply(get_code_template, axis=1)
     print("Running unit tests...")
 
@@ -54,37 +58,51 @@ def run_codeval(file_path: str) -> Tuple[pd.DataFrame, float]:
     # Return the dataframe and the accuracy, along with the collected error functions
     return df_test, accuracy, all_error_funcs
 
-def generate_dataset(all_error_funcs, context_length, target_depth, results_file):
+def run_tests(all_error_funcs, context_sizes, depth_sizes, results_file):
     # Load the MBPP dataset
     dataset = load_dataset('google-research-datasets/mbpp')
-    
+
+    # Extract all functions from the dataset
+    dataset_functions = [example['code'] for example in dataset['train']]
+    dataset_size = len(dataset_functions)
+
     # Open the results file in append mode
     with open(results_file, 'a') as f:
-        # Iterate through the buggy functions in all_error_funcs
-        for buggy_function in all_error_funcs:
-            # Select a random number of functions from the MBPP dataset based on target_depth
-            selected_functions = []
-            for _ in range(target_depth):
-                # Randomly select an example from the MBPP dataset
-                random_example = random.choice(dataset['train'])['code']
-                selected_functions.append(random_example)
-            
-            # Combine the buggy function with the selected functions from MBPP
-            code_stack = buggy_function + "\n" + "\n".join(selected_functions)
-            
-            # Trim the code stack to fit within the context length (if necessary)
-            tokens = code_stack.split()  # Assuming words are the tokens
-            if len(tokens) > context_length:
-                code_stack = " ".join(tokens[:context_length])
+        for buggy_function in tqdm(all_error_funcs, desc="Processing buggy functions"):
+            for context_length in tqdm(context_sizes, desc="Processing context sizes", leave=False):
+                # Ensure context_length doesn't exceed dataset size
+                adjusted_context_length = min(context_length, dataset_size + 1)
 
-            # Prepare the entry to write to the JSONL file
-            entry = {
-                "code": code_stack,
-                "func_error": get_function_name(buggy_function)
-            }
+                # Add a progress bar for depth sizes
+                depth_bar = tqdm(depth_sizes, leave=False)
+                for depth_percentage in depth_bar:
+                    # Update the description dynamically
+                    depth_bar.set_description(
+                        f"Buggy: {get_function_name(buggy_function)}, Context: {context_length}, Depth: {depth_percentage}%"
+                    )
+                    # Calculate target depth
+                    target_depth = max(1, min(adjusted_context_length, int(depth_percentage / 100 * adjusted_context_length)))
 
-            # Write the entry as a JSON object in the results file
-            f.write(json.dumps(entry) + '\n')
+                    # Sample random functions
+                    sample_size = adjusted_context_length - 1
+                    selected_functions = random.sample(dataset_functions, sample_size)
+
+                    # Insert the buggy function
+                    selected_functions.insert(target_depth - 1, buggy_function)
+
+                    # Create the code stack
+                    code_stack = "\n".join(selected_functions)
+
+                    # Prepare the entry
+                    entry = {
+                        "code": code_stack,
+                        "func_error": get_function_name(buggy_function),
+                        "context_length": adjusted_context_length,
+                        "depth_percentage": depth_percentage
+                    }
+
+                    # Write the entry to the results file
+                    f.write(json.dumps(entry) + '\n')    
 
 def main():
     input_file_path = "mbpp_hammingai.csv"
@@ -92,13 +110,22 @@ def main():
     df_test, accuracy, all_error_funcs = run_codeval(input_file_path)
     df_test.to_csv(output_file_path, index=False)
     print(f"Accuracy: {accuracy*100:.2f}")
-    print(all_error_funcs)
 
-    context_length = 1024  # Example context length in tokens
-    target_depth = 3  # Example target depth (number of functions from MBPP)
-    results_file = "bug_in_codestack_dataset.jsonl"
+    all_error_funcs = [item for item in all_error_funcs if item is not None]
+    # save all error funcs
+    with open('all_error_funcs.json', 'w') as f:
+        json.dump(all_error_funcs, f)
 
-    generate_dataset(all_error_funcs, context_length, target_depth, results_file)
+    # func_names = []
+    # for func in all_error_funcs:
+    #     func_names.append(get_function_name(func))
+    # print(func_names)
+
+    # context_sizes = [500, 1000, 2000, 4000, 8000, 16000]
+    # depth_sizes = [0, 25, 50, 75, 100]  # Percentages as integers
+    # results_file = "bug_in_codestack_dataset.jsonl"
+
+    # run_tests(all_error_funcs, context_sizes, depth_sizes, results_file)
 
 if __name__ == "__main__":
     main()
