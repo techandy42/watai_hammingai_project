@@ -1,14 +1,12 @@
 import json
 from openai import OpenAI
 import os
-from tqdm import tqdm  # Import tqdm for the progress bar
+from tqdm import tqdm
 
 client = OpenAI(
-    # defaults to os.environ.get("OPENAI_API_KEY")
     api_key=os.getenv('OPENAI_API_KEY')
 )
 
-# Load the jsonl file
 def load_jsonl(file_path):
     data = []
     with open(file_path, 'r') as f:
@@ -16,53 +14,62 @@ def load_jsonl(file_path):
             data.append(json.loads(line.strip()))
     return data
 
-# Prompt construction for testing LLMs
 def construct_prompt(code):
     return f"""
 The following is a code sample. One of the functions in this code contains a bug. Identify the function with the bug:
 
 {code}
 
-Please return the name of the function containing the bug, nothing else. If there is no bug, return 'none'.
+Please return the name of the function containing the bug, nothing else. Do not alter the name of the function in any way. If there is no bug, return 'none'.
 """
 
 # Test LLM on the jsonl data
-def test_llm_on_jsonl(jsonl_file, model="gpt-4", temperature=0.0):
+def test_llm_on_jsonl(bics_results_file, jsonl_file, model="gpt-4o", temperature=0.0):
     data = load_jsonl(jsonl_file)
     correct_predictions = 0
-    total_predictions = len(data)
+    total_predictions = 0
 
-    # Wrap the iteration with tqdm for a progress bar
-    for item in tqdm(data, desc="Testing LLM", unit="sample"):
-        code = item['code']
-        correct_func_name = item['func_error']
-        
-        # Construct the prompt
-        prompt = construct_prompt(code)
-        
-        # Call the LLM API using the new API method (ChatCompletion)
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            temperature=temperature,
-            max_tokens=100,
-        )
+    with open(bics_results_file, 'a') as f:
+        # Wrap the iteration with tqdm for a progress bar
+        for item in tqdm(data, desc="Testing LLM", unit="sample"):
+            code = item['code']
+            correct_func_name = item['func_error']
+            
+            # Construct the prompt
+            prompt = construct_prompt(code)
+            
+            # Call the LLM API using the new API method (ChatCompletion)
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=temperature,
+                max_tokens=16000,
+            )
 
-        # Get the model's response
-        predicted_func_name = response.choices[0].message.content.strip()
+            # Get the model's response
+            predicted_func_name = response.choices[0].message.content.strip()
+            item['guess'] = predicted_func_name
 
-        # Check if the predicted function name matches the correct one
-        if correct_func_name and correct_func_name in predicted_func_name:
-            correct_predictions += 1
+            # Check if the predicted function name matches the correct one
+            if correct_func_name and correct_func_name in predicted_func_name:
+                correct_predictions += 1
+                item['is_correct'] = 1
+            else:
+                item['is_correct'] = 0
 
-    # Calculate accuracy
-    accuracy = correct_predictions / total_predictions * 100
-    print(f"Accuracy: {accuracy:.2f}%")
-    return accuracy
+            total_predictions += 1
+            accuracy = round(correct_predictions / total_predictions * 100, 2)
+            item['accuracy'] = accuracy
 
-# Example usage:
-# Test the model with the generated results from `results.jsonl`
-jsonl_file = 'bug_in_codestack_dataset.jsonl'  # Make sure to specify your jsonl file here
-accuracy = test_llm_on_jsonl(jsonl_file)
+            f.write(json.dumps(item) + '\n')    
+
+
+def main():
+    bics_results_file = 'bics_results_file.jsonl'
+    jsonl_file = 'bug_in_codestack_dataset.jsonl'
+    test_llm_on_jsonl(bics_results_file, jsonl_file)
+
+if __name__ == "__main__":
+    main()
