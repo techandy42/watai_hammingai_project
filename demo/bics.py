@@ -30,6 +30,7 @@ def convert_codestack_to_string(codestack):
     return str_codestack.strip()
 
 def generate_code_stack(context_size, random_error_func):
+    random.shuffle(dataset_functions)
     random_error_func_tokens = len(random_error_func.split())
     codestack = []
     token_count = 0
@@ -92,7 +93,7 @@ def main():
 
     with open('all_error_funcs.json', 'r') as f:
         all_error_funcs = json.load(f)  
-        # printFuncNames(all_error_funcs)
+        printFuncNames(all_error_funcs)
 
         results_file = "bug_in_codestack_dataset.jsonl"
         run_tests(all_error_funcs, context_sizes, depth_sizes, results_file)
