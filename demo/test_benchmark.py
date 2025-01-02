@@ -16,11 +16,19 @@ def load_jsonl(file_path):
 
 def construct_prompt(code):
     return f"""
-The following is a code sample. One of the functions in this code contains a bug. Identify the function with the bug:
+<instruction_header>
+The following is a code sample (e.g., source_code).
+One of the functions in this code contains a bug.
+Identify the function with the bug.
+<instruction_header>
 
+<source_code>
 {code}
+<source_code>
 
+<output_format>
 Please return the name of the function containing the bug, nothing else. Do not alter the name of the function in any way. If there is no bug, return 'none'.
+<output_format>
 """
 
 # Test LLM on the jsonl data
