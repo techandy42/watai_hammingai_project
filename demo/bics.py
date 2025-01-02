@@ -60,8 +60,8 @@ def insert_buggy_function(codestack, error_function, depth_size):
 
 
 def run_tests(all_error_funcs, context_sizes, depth_sizes, results_file):
-    with open(results_file, 'a') as f:
-        for _ in tqdm(range(20), desc="Processing testcases"):
+    for i in tqdm(range(20), desc="Processing testcases"):
+        with open(results_file+f'_{i}.jsonl', 'a') as f:
             for context_length in tqdm(context_sizes, desc="Processing context sizes", leave=False):
                 depth_bar = tqdm(depth_sizes, leave=False)
                 for depth_percentage in depth_bar:
@@ -95,7 +95,7 @@ def main():
         all_error_funcs = json.load(f)  
         printFuncNames(all_error_funcs)
 
-        results_file = "bug_in_codestack_dataset.jsonl"
+        results_file = "bug_in_codestack_dataset"
         run_tests(all_error_funcs, context_sizes, depth_sizes, results_file)
 
 if __name__ == "__main__":
