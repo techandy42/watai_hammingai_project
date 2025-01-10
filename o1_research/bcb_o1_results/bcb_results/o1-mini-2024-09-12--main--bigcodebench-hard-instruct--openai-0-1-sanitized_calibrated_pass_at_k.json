@@ -1,0 +1,9 @@
+{
+  "pass@1": 0.2905405405405405,
+  "model": "o1-mini-2024-09-12--main",
+  "split": "instruct",
+  "subset": "hard",
+  "calibrated": true,
+  "gt_pass_rate": 1.0,
+  "failed_tasks": []
+}
