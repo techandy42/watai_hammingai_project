@@ -1,0 +1,1472 @@
+task_id,text,pred_code,status_code,passed
+11,Write a python function to remove first and last occurrence of a given character from the string.,"def remove_Occ(s, char):
+    first_occurrence = s.find(char)
+    last_occurrence = s.rfind(char)
+    
+    if first_occurrence == -1 or first_occurrence == last_occurrence:
+        return s.replace(char, '', 1) if first_occurrence != -1 else s
+    
+    result = s[:first_occurrence] + s[first_occurrence + 1:last_occurrence] + s[last_occurrence + 1:]
+    return result",1,True
+12,Write a function to sort a given matrix in ascending order according to the sum of its rows.,"def sort_matrix(matrix):
+    sorted_matrix = sorted(matrix, key=sum)
+    return sorted_matrix",1,True
+13,Write a function to count the most common words in a dictionary.,"def count_common(words):
+    from collections import Counter
+    word_count = Counter(words)
+    most_common = word_count.most_common()
+    return most_common",0,False
+14,Write a python function to find the volume of a triangular prism.,"def find_Volume(base, height, length):
+    area_of_base = 0.5 * base * height
+    volume = area_of_base * length
+    return volume",1,True
+15,Write a function to split a string at lowercase letters.,"def split_lowerstring(s):
+    result = []
+    current = """"
+    
+    for char in s:
+        if char.islower() and current:
+            result.append(current)
+            current = char
+        else:
+            current += char
+            
+    if current:
+        result.append(current)
+        
+    return result",0,False
+16,Write a function to find sequences of lowercase letters joined with an underscore.,"def text_lowercase_underscore(input_string):
+    import re
+    result = re.findall(r'[a-z]+(?:_[a-z]+)*', input_string)
+    return result",0,False
+17,Write a function to find the perimeter of a square.,"def square_perimeter(side_length):
+    result = 4 * side_length
+    return result",1,True
+18,Write a function to remove characters from the first string which are present in the second string.,"def remove_dirty_chars(str1, str2):
+    result = ''.join(char for char in str1 if char not in str2)
+    return result",1,True
+19,Write a function to find whether a given array of integers contains any duplicate element.,"def test_duplicate(arr):
+    seen = set()
+    for num in arr:
+        if num in seen:
+            return True
+        seen.add(num)
+    return False",1,True
+20,Write a function to check if the given number is woodball or not.,"def is_woodall(n):
+    if n < 1:
+        return False
+    
+    k = 1
+    while True:
+        woodall_number = k * (2 ** k) - 1
+        if woodall_number == n:
+            return True
+        elif woodall_number > n:
+            return False
+        k += 1",1,True
+21,Write a function to find m number of multiples of n.,"def multiples_of_num(n, m):
+    result = [n * i for i in range(1, m + 1)]
+    return result",0,False
+22,Write a function to find the first duplicate element in a given array of integers.,"def find_first_duplicate(arr):
+    seen = set()
+    for num in arr:
+        if num in seen:
+            return num
+        seen.add(num)
+    return None",0,False
+23,Write a python function to find the maximum sum of elements of list in a list of lists.,"def maximum_Sum(lists):
+    max_sum = 0
+    for sublist in lists:
+        current_sum = sum(sublist)
+        if current_sum > max_sum:
+            max_sum = current_sum
+    return max_sum",0,False
+24,Write a function to convert the given binary number to its decimal equivalent.,"def binary_to_decimal(binary):
+    decimal = 0
+    binary_str = str(binary)
+    length = len(binary_str)
+    
+    for i in range(length):
+        decimal += int(binary_str[length - 1 - i]) * (2 ** i)
+    
+    return decimal",1,True
+25,Write a python function to find the product of non-repeated elements in a given array.,"def find_Product(arr, n):
+    from collections import Counter
+    
+    count = Counter(arr)
+    product = 1
+    found_non_repeated = False
+    
+    for num, freq in count.items():
+        if freq == 1:
+            product *= num
+            found_non_repeated = True
+            
+    return product if found_non_repeated else 0",0,False
+26,Write a function to check if the given tuple list has all k elements.,"def check_k_elements(tuples_list, k):
+    all_elements = set()
+    for tup in tuples_list:
+        all_elements.update(tup)
+    return len(all_elements) == k",0,False
+27,Write a python function to remove all digits from a list of strings.,"def remove(strings):
+    result = [s.translate(str.maketrans('', '', '0123456789')) for s in strings]
+    return result",1,True
+28,Write a python function to find binomial co-efficient.,"def binomial_Coeff(n, k):
+    if k > n:
+        return 0
+    if k == 0 or k == n:
+        return 1
+    numerator = 1
+    denominator = 1
+    for i in range(1, k + 1):
+        numerator *= (n - i + 1)
+        denominator *= i
+    return numerator // denominator",1,True
+29,Write a python function to find the element occurring odd number of times.,"def get_Odd_Occurrence(arr, n):
+    result = 0
+    for num in arr:
+        result ^= num
+    return result",1,True
+30,Write a python function to count all the substrings starting and ending with same characters.,"def count_Substring_With_Equal_Ends(s):
+    count = 0
+    n = len(s)
+    
+    for i in range(n):
+        for j in range(i, n):
+            if s[i] == s[j]:
+                count += 1
+                
+    return count",1,True
+31,Write a function to find the top k integers that occur most frequently from given lists of sorted and distinct integers using heap queue algorithm.,"def func(lists, k):
+    from collections import Counter
+    from heapq import nlargest
+
+    # Flatten the list of lists and count the frequency of each integer
+    flat_list = [num for sublist in lists for num in sublist]
+    frequency = Counter(flat_list)
+
+    # Use nlargest to get the top k integers based on frequency
+    top_k = nlargest(k, frequency.keys(), key=frequency.get)
+
+    return top_k",0,False
+32,Write a python function to find the largest prime factor of a given number.,"def max_Prime_Factors(n):
+    def is_prime(num):
+        if num <= 1:
+            return False
+        for i in range(2, int(num**0.5) + 1):
+            if num % i == 0:
+                return False
+        return True
+
+    largest_prime = None
+    for i in range(2, n + 1):
+        if n % i == 0 and is_prime(i):
+            largest_prime = i
+            
+    return largest_prime",1,True
+33,Write a python function to convert a decimal number to binary number.,"def decimal_To_Binary(n):
+    if n == 0:
+        return ""0""
+    binary = """"
+    while n > 0:
+        binary = str(n % 2) + binary
+        n = n // 2
+    return binary",0,False
+34,Write a python function to find the missing number in a sorted array.,"def find_missing(arr, n):
+    expected_sum = n * (n + 1) // 2
+    actual_sum = sum(arr)
+    return expected_sum - actual_sum",0,False
+35,Write a function to find the n-th rectangular number.,"def find_rect_num(n):
+    result = n * (n + 1) // 2
+    return result",0,False
+36,Write a python function to find the nth digit in the proper fraction of two given numbers.,"def find_Nth_Digit(numerator, denominator, n):
+    # Calculate the decimal representation of the fraction
+    fraction = numerator / denominator
+    # Convert the fraction to a string and find the decimal part
+    decimal_str = str(fraction).split('.')[1]
+    # Return the nth digit if it exists, otherwise return None
+    return int(decimal_str[n - 1]) if n <= len(decimal_str) else None",1,True
+37,Write a function to sort a given mixed list of integers and strings.,"def sort_mixed_list(mixed_list):
+    sorted_integers = sorted([item for item in mixed_list if isinstance(item, int)])
+    sorted_strings = sorted([item for item in mixed_list if isinstance(item, str)])
+    return sorted_integers + sorted_strings",1,True
+38,Write a function to find the division of first even and odd number of a given list.,"def div_even_odd(lst):
+    even = next((x for x in lst if x % 2 == 0), None)
+    odd = next((x for x in lst if x % 2 != 0), None)
+    
+    if even is not None and odd is not None:
+        return even / odd
+    else:
+        return None",1,True
+39,Write a function to check if the letters of a given string can be rearranged so that two characters that are adjacent to each other are different.,"def rearange_string(s):
+    from collections import Counter
+    count = Counter(s)
+    max_freq = max(count.values())
+    if max_freq > (len(s) + 1) // 2:
+        return False
+    return True",0,False
+40,Write a function to find frequency of the elements in a given list of lists using collections module.,"def freq_element(lists):
+    from collections import Counter
+    flat_list = [item for sublist in lists for item in sublist]
+    frequency = Counter(flat_list)
+    return dict(frequency)",1,True
+41,Write a function to filter even numbers using lambda function.,"def filter_evennumbers(numbers):
+    result = list(filter(lambda x: x % 2 == 0, numbers))
+    return result",1,True
+42,Write a python function to find the sum of repeated elements in a given array.,"def find_Sum(arr, n):
+    from collections import Counter
+    count = Counter(arr)
+    repeated_sum = sum(key for key, value in count.items() if value > 1)
+    return repeated_sum",0,False
+43,Write a function to find sequences of lowercase letters joined with an underscore using regex.,"def text_match(text):
+    import re
+    pattern = r'[a-z]+(?:_[a-z]+)*'
+    result = re.findall(pattern, text)
+    return result",0,False
+44,Write a function that matches a word at the beginning of a string.,"def text_match_string(string):
+    return string.startswith(""python"")",0,False
+45,Write a function to find the gcd of the given array elements.,"def get_gcd(arr):
+    from math import gcd
+    from functools import reduce
+    return reduce(gcd, arr)",1,True
+46,Write a python function to determine whether all the numbers are different from each other are not.,"def test_distinct(numbers):
+    return len(numbers) == len(set(numbers))",1,True
+47,Write a python function to find the last digit when factorial of a divides factorial of b.,"def compute_Last_Digit(a, b):
+    from math import factorial
+
+    if a > b:
+        return None
+
+    factorial_a = factorial(a)
+    factorial_b = factorial(b)
+
+    if factorial_b % factorial_a != 0:
+        return None
+
+    last_digit = factorial_b % 10
+    return last_digit",0,False
+48,Write a python function to set all odd bits of a given number.,"def odd_bit_set_number(num):
+    # Create a mask with all odd bits set to 1
+    mask = 0xAAAAAAAA  # This is the binary representation: 10101010...
+    # Set the odd bits of the given number
+    result = num | mask
+    return result",0,False
+49,Write a function to extract every first or specified element from a given two-dimensional list.,"def specified_element(matrix, index):
+    result = [row[index] for row in matrix if len(row) > index]
+    return result",1,True
+50,Write a function to find the list with minimum length using lambda function.,"def min_length_list([[0], [1, 3], [5, 7], [9, 11], [13, 15, 17]]):
+    return min([[0], [1, 3], [5, 7], [9, 11], [13, 15, 17]], key=lambda x: len(x))",0,False
+51,Write a function to print check if the triangle is equilateral or not.,"def check_equilateral(a, b, c):
+    if a <= 0 or b <= 0 or c <= 0:
+        return False
+    return a == b == c",1,True
+52,Write a function to caluclate area of a parallelogram.,"def parallelogram_area(base, height):
+    area = base * height
+    return area",1,True
+53,Write a python function to check whether the first and last characters of a given string are equal or not.,"def check_Equality(s):
+    if len(s) == 0:
+        return False
+    return s[0] == s[-1]",0,False
+54,Write a function to sort the given array by using counting sort.,"def counting_sort(arr):
+    if not arr:
+        return []
+
+    max_val = max(arr)
+    min_val = min(arr)
+    range_of_elements = max_val - min_val + 1
+
+    count = [0] * range_of_elements
+    output = [0] * len(arr)
+
+    for number in arr:
+        count[number - min_val] += 1
+
+    for i in range(1, len(count)):
+        count[i] += count[i - 1]
+
+    for number in reversed(arr):
+        output[count[number - min_val] - 1] = number
+        count[number - min_val] -= 1
+
+    return output",1,True
+55,Write a function to find t-nth term of geometric series.,"def tn_gp(a, r, n):
+    result = a * (r ** (n - 1))
+    return result",0,False
+56,Write a python function to check if a given number is one less than twice its reverse.,"def check(n):
+    reverse_n = int(str(n)[::-1])
+    return n == 2 * reverse_n - 1",1,True
+57,Write a python function to find the largest number that can be formed with the given digits.,"def find_Max_Num(digits, n):
+    # Convert digits to strings and sort them in descending order
+    sorted_digits = sorted(map(str, digits), reverse=True)
+    # Join the sorted digits to form the largest number
+    result = ''.join(sorted_digits)
+    return int(result)  # Convert the result back to an integer",1,True
+58,Write a python function to check whether the given two integers have opposite sign or not.,"def opposite_Signs(a, b):
+    return (a < 0) != (b < 0)",1,True
+59,Write a function to find the nth octagonal number.,"def is_octagonal(n):
+    result = n * (3 * n - 2)
+    return result",1,True
+60,Write a function to find the maximum length of the subsequence with difference between adjacent elements for the given array.,"def max_len_sub(arr, n):
+    if n == 0:
+        return 0
+    
+    max_length = 1
+    current_length = 1
+    
+    for i in range(1, n):
+        if abs(arr[i] - arr[i - 1]) == 1:
+            current_length += 1
+            max_length = max(max_length, current_length)
+        else:
+            current_length = 1
+            
+    return max_length",0,False
+61,Write a python function to count number of substrings with the sum of digits equal to their length.,"def count_Substrings(s, n):
+    count = 0
+    length = len(s)
+    
+    for i in range(length):
+        for j in range(i + 1, length + 1):
+            substring = s[i:j]
+            if len(substring) == n:
+                digit_sum = sum(int(char) for char in substring)
+                if digit_sum == n:
+                    count += 1
+                    
+    return count",0,False
+62,Write a python function to find smallest number in a list.,"def smallest_num(lst):
+    if not lst:
+        return None
+    smallest = lst[0]
+    for num in lst:
+        if num < smallest:
+            smallest = num
+    return smallest",1,True
+63,Write a function to find the maximum difference between available pairs in the given tuple list.,"def max_difference(tuples_list):
+    if not tuples_list or len(tuples_list) < 2:
+        return 0
+    
+    max_diff = 0
+    for i in range(len(tuples_list)):
+        for j in range(i + 1, len(tuples_list)):
+            diff = abs(tuples_list[i][0] - tuples_list[j][0]) + abs(tuples_list[i][1] - tuples_list[j][1])
+            max_diff = max(max_diff, diff)
+    
+    return max_diff",0,False
+64,Write a function to sort a list of tuples using lambda.,"def subject_marks(marks):
+    result = sorted(marks, key=lambda x: x[1])
+    return result",1,True
+65,Write a function of recursion list sum.,"def recursive_list_sum(lst):
+    if not lst:
+        return 0
+    return lst[0] + recursive_list_sum(lst[1:])",0,False
+66,Write a python function to count positive numbers in a list.,"def pos_count(numbers):
+    result = sum(1 for num in numbers if num > 0)
+    return result",1,True
+67,Write a function to find the number of ways to partition a set of bell numbers.,"def bell_number(n):
+    bell = [[0 for _ in range(n + 1)] for _ in range(n + 1)]
+    bell[0][0] = 1
+
+    for i in range(1, n + 1):
+        bell[i][0] = bell[i - 1][i - 1]
+        for j in range(1, i + 1):
+            bell[i][j] = bell[i - 1][j - 1] + bell[i][j - 1]
+
+    return bell[n][0]",1,True
+68,Write a python function to check whether the given array is monotonic or not.,"def is_Monotonic(arr):
+    if not arr:
+        return True
+    
+    increasing = decreasing = True
+    
+    for i in range(1, len(arr)):
+        if arr[i] > arr[i - 1]:
+            decreasing = False
+        elif arr[i] < arr[i - 1]:
+            increasing = False
+            
+    return increasing or decreasing",1,True
+69,Write a function to check whether a list contains the given sublist or not.,"def is_sublist(main_list, sub_list):
+    sub_len = len(sub_list)
+    for i in range(len(main_list) - sub_len + 1):
+        if main_list[i:i + sub_len] == sub_list:
+            return True
+    return False",1,True
+70,Write a function to find whether all the given tuples have equal length or not.,"def get_equal(tuples_list):
+    if not tuples_list:
+        return True
+    first_length = len(tuples_list[0])
+    for tup in tuples_list:
+        if len(tup) != first_length:
+            return False
+    return True",0,False
+71,Write a function to sort a list of elements using comb sort.,"def comb_sort(arr):
+    gap = len(arr)
+    shrink = 1.3
+    sorted = False
+
+    while not sorted:
+        gap = int(gap / shrink)
+        if gap < 1:
+            gap = 1
+
+        sorted = True
+        for i in range(len(arr) - gap):
+            if arr[i] > arr[i + gap]:
+                arr[i], arr[i + gap] = arr[i + gap], arr[i]
+                sorted = False
+
+    return arr",0,False
+72,Write a python function to check whether the given number can be represented as difference of two squares or not.,"def dif_Square(n):
+    if n < 0:
+        return False
+    return n % 4 == 0 or n % 4 == 1",0,False
+73,Write a function to split the given string with multiple delimiters by using regex.,"def multiple_split(input_string):
+    import re
+    result = re.split(r'[ \n*]', input_string)
+    return result",0,False
+74,Write a function to check whether it follows the sequence given in the patterns array.,"def is_samepatterns(patterns, values):
+    if len(patterns) != len(values):
+        return False
+    
+    pattern_to_value = {}
+    value_to_pattern = {}
+    
+    for pattern, value in zip(patterns, values):
+        if pattern in pattern_to_value:
+            if pattern_to_value[pattern] != value:
+                return False
+        else:
+            pattern_to_value[pattern] = value
+        
+        if value in value_to_pattern:
+            if value_to_pattern[value] != pattern:
+                return False
+        else:
+            value_to_pattern[value] = pattern
+    
+    return True",1,True
+75,Write a function to find tuples which have all elements divisible by k from the given list of tuples.,"def find_tuples(tuples_list, k):
+    result = [tup for tup in tuples_list if all(elem % k == 0 for elem in tup)]
+    return result",0,False
+76,Write a python function to count the number of squares in a rectangle.,"def count_Squares(length, width):
+    total_squares = 0
+    for size in range(1, min(length, width) + 1):
+        total_squares += (length - size + 1) * (width - size + 1)
+    return total_squares",1,True
+77,Write a python function to find the difference between sum of even and odd digits.,"def is_Diff(n):
+    even_sum = 0
+    odd_sum = 0
+    
+    for digit in str(n):
+        if int(digit) % 2 == 0:
+            even_sum += int(digit)
+        else:
+            odd_sum += int(digit)
+    
+    return even_sum - odd_sum",0,False
+78,Write a python function to find number of integers with odd number of set bits.,"def count_With_Odd_SetBits(n):
+    count = 0
+    for i in range(n + 1):
+        if bin(i).count('1') % 2 == 1:
+            count += 1
+    return count",1,True
+79,Write a python function to check whether the length of the word is odd or not.,"def word_len(word):
+    return len(word) % 2 != 0",1,True
+80,Write a function to find the nth tetrahedral number.,"def tetrahedral_number(n):
+    result = (n * (n + 1) * (n + 2)) // 6
+    return result",1,True
+81,Write a function to zip the two given tuples.,"def zip_tuples(tuple1, tuple2):
+    result = tuple(zip(tuple1, tuple2))
+    return result",0,False
+82,Write a function to find the volume of a sphere.,"def volume_sphere(radius):
+    import math
+    result = (4/3) * math.pi * (radius ** 3)
+    return result",1,True
+83,Write a python function to find the character made by adding all the characters of the given string.,"def get_Char(s):
+    result = chr(sum(ord(char) for char in s))
+    return result",0,False
+84,Write a function to find the n-th number in newman conway sequence.,"def sequence(n):
+    if n < 1:
+        return 0
+    if n == 1 or n == 2:
+        return n
+    result = [0] * (n + 1)
+    result[1] = 1
+    result[2] = 2
+    for i in range(3, n + 1):
+        result[i] = result[result[i - 1]] + result[i - result[i - 1]]
+    return result[n]",0,False
+85,Write a function to find the surface area of a sphere.,"def surfacearea_sphere(radius):
+    import math
+    result = 4 * math.pi * (radius ** 2)
+    return result",1,True
+86,Write a function to find nth centered hexagonal number.,"def centered_hexagonal_number(n):
+    result = n * (2 * n - 1)
+    return result",0,False
+87,Write a function to merge three dictionaries into a single expression.,"def merge_dictionaries_three(dict1, dict2, dict3):
+    return {**dict1, **dict2, **dict3}",0,False
+88,Write a function to get the frequency of the elements in a list.,"def freq_count(lst):
+    frequency = {}
+    for item in lst:
+        if item in frequency:
+            frequency[item] += 1
+        else:
+            frequency[item] = 1
+    return frequency",1,True
+89,Write a function to find the closest smaller number than n.,"def closest_num(n):
+    if n <= 0:
+        return None
+    return n - 1",1,True
+90,Write a python function to find the length of the longest word.,"def len_log(words):
+    longest_length = 0
+    for word in words:
+        if len(word) > longest_length:
+            longest_length = len(word)
+    return longest_length",1,True
+91,Write a function to check if a substring is present in a given list of string values.,"def find_substring(strings, substring):
+    result = any(substring in s for s in strings)
+    return result",1,True
+92,Write a function to check whether the given number is undulating or not.,"def is_undulating(s):
+    for i in range(1, len(s) - 1):
+        if s[i] == s[i - 1] or s[i] == s[i + 1]:
+            return False
+    return True if len(s) > 1 else False",1,True
+93,Write a function to calculate the value of 'a' to the power 'b'.,"def power(a, b):
+    result = a ** b
+    return result",1,True
+94,Write a function to extract the index minimum value record from the given tuples.,"def index_minimum(tuples):
+    if not tuples:
+        return None
+    min_index = 0
+    for i in range(1, len(tuples)):
+        if tuples[i] < tuples[min_index]:
+            min_index = i
+    return min_index",0,False
+95,Write a python function to find the minimum length of sublist.,"def Find_Min_Length(lst):
+    if not lst:
+        return 0
+    min_length = len(lst[0])
+    for sublist in lst:
+        if len(sublist) < min_length:
+            min_length = len(sublist)
+    return min_length",1,True
+96,Write a python function to find the number of divisors of a given integer.,"def divisor(n):
+    count = 0
+    for i in range(1, n + 1):
+        if n % i == 0:
+            count += 1
+    return count",1,True
+97,Write a function to find frequency count of list of lists.,"def frequency_lists(lists):
+    from collections import Counter
+    frequency = Counter()
+    for sublist in lists:
+        frequency.update(sublist)
+    return dict(frequency)",1,True
+98,Write a function to multiply all the numbers in a list and divide with the length of the list.,"def multiply_num(numbers):
+    if not numbers:
+        return 0
+    product = 1
+    for num in numbers:
+        product *= num
+    return product / len(numbers)",1,True
+99,Write a function to convert the given decimal number to its binary equivalent.,"def decimal_to_binary(n):
+    if n == 0:
+        return ""0""
+    binary = """"
+    while n > 0:
+        binary = str(n % 2) + binary
+        n //= 2
+    return binary",1,True
+100,Write a function to find the next smallest palindrome of a specified number.,"def next_smallest_palindrome(num):
+    def is_palindrome(n):
+        return str(n) == str(n)[::-1]
+
+    num -= 1
+    while num >= 0:
+        if is_palindrome(num):
+            return num
+        num -= 1
+
+    return None  # In case there's no smaller palindrome, though this won't happen for positive integers.",0,False
+101,Write a function to find the kth element in the given array.,"def kth_element(arr, n, k):
+    arr.sort()
+    return arr[k - 1] if k <= n else None",0,False
+102,Write a function to convert snake case string to camel case string.,"def snake_to_camel(snake_str):
+    components = snake_str.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])",0,False
+103,"Write a function to find eulerian number a(n, m).","def eulerian_num(n, m):
+    A = [[0] * (n + 1) for _ in range(n + 1)]
+    A[0][0] = 1
+
+    for i in range(1, n + 1):
+        for j in range(i + 1):
+            if j > 0:
+                A[i][j] += (i - j + 1) * A[i - 1][j - 1]
+            A[i][j] += (j + 1) * A[i - 1][j]
+
+    return A[n][m]",0,False
+104,Write a function to sort each sublist of strings in a given list of lists using lambda function.,"def sort_sublists(lists):
+    result = [sorted(sublist, key=lambda x: x) for sublist in lists]
+    return result",1,True
+105,Write a python function to count true booleans in the given list.,"def count(bool_list):
+    result = sum(bool_list)
+    return result",1,True
+106,Write a function to add the given list to the given tuples.,"def add_lists(lst, ):
+    tuples = [(1, 2), (3, 4), (5, 6)]
+    result = [t + (x,) for t in tuples for x in lst]
+    return result",0,False
+107,Write a python function to count hexadecimal numbers for a given range.,"def count_Hexadecimal(start, end):
+    hex_numbers = [hex(i) for i in range(start, end + 1)]
+    return hex_numbers",0,False
+108,Write a function to merge multiple sorted inputs into a single sorted iterator using heap queue algorithm.,"def merge_sorted_list(*lists):
+    import heapq
+    
+    merged_iterator = heapq.merge(*[sorted(lst) for lst in lists])
+    return list(merged_iterator)",1,True
+109,Write a python function to find the count of rotations of a binary string with odd value.,"def odd_Equivalent(binary_string, length):
+    count = 0
+    for i in range(length):
+        rotated_string = binary_string[i:] + binary_string[:i]
+        if int(rotated_string, 2) % 2 == 1:
+            count += 1
+    return count",1,True
+110,Write a function to extract the ranges that are missing from the given list with the given start range and end range values.,"def extract_missing(ranges, start, end):
+    missing_ranges = []
+    current = start
+    
+    for r in sorted(ranges):
+        if r[0] > current:
+            missing_ranges.append((current, r[0] - 1))
+        current = max(current, r[1] + 1)
+    
+    if current <= end:
+        missing_ranges.append((current, end))
+    
+    return missing_ranges",0,False
+111,Write a function to find common elements in given nested lists. * list item * list item * list item * list item,"def common_in_nested_lists(nested_lists):
+    if not nested_lists:
+        return []
+    
+    common_elements = set(nested_lists[0])
+    
+    for lst in nested_lists[1:]:
+        common_elements.intersection_update(lst)
+    
+    return list(common_elements)",1,True
+112,Write a python function to find the perimeter of a cylinder.,"def perimeter(radius, height):
+    import math
+    circumference = 2 * math.pi * radius
+    return circumference + 2 * height",0,False
+113,Write a function to check if a string represents an integer or not.,"def check_integer(s):
+    if s.isdigit() or (s.startswith('-') and s[1:].isdigit()):
+        return True
+    return False",1,True
+114,Write a function to assign frequency to each tuple in the given tuple list.,"def assign_freq(tuples_list):
+    frequency = {}
+    for item in tuples_list:
+        if item in frequency:
+            frequency[item] += 1
+        else:
+            frequency[item] = 1
+    result = [(item, frequency[item]) for item in tuples_list]
+    return result",0,False
+115,Write a function to check whether all dictionaries in a list are empty or not.,"def empty_dit(dicts):
+    return all(isinstance(d, dict) and not d for d in dicts)",1,True
+116,Write a function to convert a given tuple of positive integers into an integer.,"def tuple_to_int(t):
+    result = int(''.join(map(str, t)))
+    return result",1,True
+117,Write a function to convert all possible convertible elements in the list to float.,"def list_to_float(lst):
+    result = []
+    for item in lst:
+        try:
+            result.append(float(item))
+        except (ValueError, TypeError):
+            result.append(item)
+    return result",0,False
+118,[link text](https:// [link text](https:// [link text](https://)))write a function to convert a string to a list.,"def string_to_list(input_string):
+    result = input_string.split()
+    return result",1,True
+119,Write a python function to find the element that appears only once in a sorted array.,"def search(arr, n):
+    left, right = 0, n - 1
+    
+    while left < right:
+        mid = left + (right - left) // 2
+        
+        # Check if mid is even or odd
+        if mid % 2 == 0:
+            if arr[mid] == arr[mid + 1]:
+                left = mid + 2
+            else:
+                right = mid
+        else:
+            if arr[mid] == arr[mid - 1]:
+                left = mid + 1
+            else:
+                right = mid
+    
+    return arr[left]",1,True
+120,Write a function to find the maximum product from the pairs of tuples within a given list.,"def max_product_tuple(tuples_list):
+    max_product = float('-inf')
+    for i in range(len(tuples_list)):
+        for j in range(i + 1, len(tuples_list)):
+            product = tuples_list[i][0] * tuples_list[i][1] * tuples_list[j][0] * tuples_list[j][1]
+            if product > max_product:
+                max_product = product
+    return max_product",0,False
+121,Write a function to find the triplet with sum of the given array,"def check_triplet(arr, a, b, c):
+    target_sum = a + b + c
+    n = len(arr)
+    for i in range(n):
+        for j in range(i + 1, n):
+            for k in range(j + 1, n):
+                if arr[i] + arr[j] + arr[k] == target_sum:
+                    return True
+    return False",0,False
+122,Write a function to find n’th smart number.,"def smartNumber(n):
+    smart_numbers = []
+    i = 1
+    while len(smart_numbers) < n:
+        if i % 2 == 0 or i % 3 == 0 or i % 5 == 0:
+            smart_numbers.append(i)
+        i += 1
+    return smart_numbers[-1]",0,False
+123,Write a function to sum all amicable numbers from 1 to a specified number.,"def amicable_numbers_sum(n):
+    def sum_of_divisors(num):
+        total = 1
+        for i in range(2, int(num**0.5) + 1):
+            if num % i == 0:
+                total += i
+                if i != num // i:
+                    total += num // i
+        return total
+
+    amicable_numbers = set()
+    
+    for i in range(2, n + 1):
+        if i not in amicable_numbers:
+            partner = sum_of_divisors(i)
+            if partner != i and sum_of_divisors(partner) == i:
+                amicable_numbers.add(i)
+                amicable_numbers.add(partner)
+
+    return sum(amicable_numbers)",1,True
+124,Write a function to get the angle of a complex number.,"def angle_complex(z):
+    import cmath
+    return cmath.phase(z)",0,False
+125,Write a function to find the maximum difference between the number of 0s and number of 1s in any sub-string of the given binary string.,"def find_length(s, n):
+    max_diff = 0
+    current_diff = 0
+    
+    for char in s:
+        if char == '0':
+            current_diff += 1
+        else:
+            current_diff -= 1
+        
+        if current_diff < 0:
+            current_diff = 0
+        
+        max_diff = max(max_diff, current_diff)
+    
+    return max_diff",1,True
+126,Write a python function to find the sum of common divisors of two given numbers.,"def sum(a, b):
+    def gcd(x, y):
+        while y:
+            x, y = y, x % y
+        return x
+
+    common_gcd = gcd(a, b)
+    common_divisors_sum = sum(i for i in range(1, common_gcd + 1) if common_gcd % i == 0)
+    
+    return common_divisors_sum",0,False
+127,Write a function to multiply two integers without using the * operator in python.,"def multiply_int(a, b):
+    result = 0
+    for _ in range(abs(b)):
+        result += abs(a)
+    if (a < 0) ^ (b < 0):
+        result = -result
+    return result",1,True
+128,Write a function to shortlist words that are longer than n from a given list of words.,"def long_words(n, sentence):
+    words = sentence.split()
+    result = [word for word in words if len(word) > n]
+    return result",1,True
+129,Write a function to calculate magic square.,"def magic_square_test(square):
+    n = len(square)
+    magic_sum = n * (n**2 + 1) // 2
+
+    # Check rows
+    for row in square:
+        if sum(row) != magic_sum:
+            return False
+
+    # Check columns
+    for col in range(n):
+        if sum(square[row][col] for row in range(n)) != magic_sum:
+            return False
+
+    # Check diagonals
+    if sum(square[i][i] for i in range(n)) != magic_sum:
+        return False
+    if sum(square[i][n - 1 - i] for i in range(n)) != magic_sum:
+        return False
+
+    return True",1,True
+130,Write a function to find the item with maximum frequency in a given list.,"def max_occurrences(lst):
+    frequency = {}
+    for item in lst:
+        if item in frequency:
+            frequency[item] += 1
+        else:
+            frequency[item] = 1
+    max_item = max(frequency, key=frequency.get)
+    return max_item",0,False
+131,Write a python function to reverse only the vowels of a given string.,"def reverse_vowels(s):
+    vowels = ""aeiouAEIOU""
+    s_list = list(s)
+    left, right = 0, len(s) - 1
+    
+    while left < right:
+        if s_list[left] not in vowels:
+            left += 1
+        elif s_list[right] not in vowels:
+            right -= 1
+        else:
+            s_list[left], s_list[right] = s_list[right], s_list[left]
+            left += 1
+            right -= 1
+            
+    return ''.join(s_list)",1,True
+132,Write a function to convert tuple to a string.,"def tup_string(tup):
+    result = ''.join(map(str, tup))
+    return result",1,True
+133,Write a function to calculate the sum of the negative numbers of a given list of numbers using lambda function.,"def sum_negativenum(numbers):
+    result = sum(filter(lambda x: x < 0, numbers))
+    return result",1,True
+134,Write a python function to check whether the last element of given array is even or odd after performing an operation p times.,"def check_last(arr, p, x):
+    for _ in range(p):
+        arr[-1] += x
+    return ""even"" if arr[-1] % 2 == 0 else ""odd""",0,False
+135,Write a function to find the nth hexagonal number.,"def hexagonal_num(n):
+    result = n * (2 * n - 1)
+    return result",1,True
+136,Write a function to calculate electricity bill.,"def cal_electbill(units):
+    if units <= 100:
+        bill = units * 1.5
+    elif units <= 300:
+        bill = (100 * 1.5) + ((units - 100) * 2.5)
+    else:
+        bill = (100 * 1.5) + (200 * 2.5) + ((units - 300) * 3.5)
+    
+    return bill",0,False
+137,Write a function to find the ration of zeroes in an array of integers.,"def zero_count(arr):
+    if not arr:
+        return 0
+    zeroes = arr.count(0)
+    ratio = zeroes / len(arr)
+    return ratio",0,False
+138,Write a python function to check whether the given number can be represented as sum of non-zero powers of 2 or not.,"def is_Sum_Of_Powers_Of_Two(n):
+    if n <= 0:
+        return False
+    return (n & (n - 1)) == 0 or n == 1 or (n > 1 and (n & (n - 1)) != 0)",0,False
+139,Write a function to find the circumference of a circle.,"def circle_circumference(radius):
+    pi = 3.14159
+    circumference = 2 * pi * radius
+    return circumference",0,False
+140,Write a function to extract elements that occur singly in the given tuple list.,"def extract_singly(tuple_list):
+    from collections import Counter
+    flat_list = [item for tup in tuple_list for item in tup]
+    count = Counter(flat_list)
+    result = [item for item in count if count[item] == 1]
+    return result",0,False
+141,Write a function to sort a list of elements using pancake sort.,"def pancake_sort(arr):
+    def flip(sub_arr, k):
+        return sub_arr[:k][::-1] + sub_arr[k:]
+
+    def find_max_index(sub_arr, n):
+        max_index = 0
+        for i in range(1, n):
+            if sub_arr[i] > sub_arr[max_index]:
+                max_index = i
+        return max_index
+
+    n = len(arr)
+    for size in range(n, 1, -1):
+        max_index = find_max_index(arr, size)
+
+        if max_index != size - 1:
+            if max_index != 0:
+                arr = flip(arr, max_index + 1)
+            arr = flip(arr, size)
+
+    return arr",1,True
+142,Write a function to count the same pair in three given lists.,"def count_samepair(list1, list2, list3):
+    count = 0
+    for item in list1:
+        if item in list2 and item in list3:
+            count += 1
+    return count",0,False
+143,Write a function to find number of lists present in the given tuple.,"def find_lists(tup):
+    count = 0
+    for item in tup:
+        if isinstance(item, list):
+            count += 1
+    return count",0,False
+144,Write a python function to find the sum of absolute differences in all pairs of the given array.,"def sum_Pairs(arr, n):
+    total_sum = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            total_sum += abs(arr[i] - arr[j])
+    return total_sum",1,True
+145,Write a python function to find the maximum difference between any two elements in a given array.,"def max_Abs_Diff(arr):
+    if not arr:
+        return 0
+    max_val = max(arr)
+    min_val = min(arr)
+    return max_val - min_val",0,False
+146,Write a function to find the ascii value of total characters in a string.,"def ascii_value_string(s):
+    total_ascii = sum(ord(char) for char in s)
+    return total_ascii",0,False
+147,Write a function to find the maximum total path sum in the given triangle.,"def max_path_sum(triangle, row, col):
+    if row == 0:
+        return triangle[0][0]
+    
+    for r in range(row + 1):
+        for c in range(r + 1):
+            if r == 0 and c == 0:
+                continue
+            left_parent = triangle[r - 1][c - 1] if c > 0 else 0
+            right_parent = triangle[r - 1][c] if c < r else 0
+            triangle[r][c] += max(left_parent, right_parent)
+    
+    return triangle[row][col]",0,False
+148,Write a function to divide a number into two parts such that the sum of digits is maximum.,"def sum_digits_twoparts(n):
+    str_n = str(n)
+    max_sum = 0
+    best_pair = (0, 0)
+
+    for i in range(1, len(str_n)):
+        part1 = int(str_n[:i])
+        part2 = int(str_n[i:])
+        digit_sum = sum(int(d) for d in str(part1)) + sum(int(d) for d in str(part2))
+
+        if digit_sum > max_sum:
+            max_sum = digit_sum
+            best_pair = (part1, part2)
+
+    return best_pair",0,False
+149,Write a function to find the longest subsequence such that the difference between adjacents is one for the given array.,"def longest_subseq_with_diff_one(arr, n):
+    if n == 0:
+        return []
+    
+    longest_subseq = []
+    current_subseq = [arr[0]]
+    
+    for i in range(1, n):
+        if abs(arr[i] - arr[i - 1]) == 1:
+            current_subseq.append(arr[i])
+        else:
+            if len(current_subseq) > len(longest_subseq):
+                longest_subseq = current_subseq
+            current_subseq = [arr[i]]
+    
+    if len(current_subseq) > len(longest_subseq):
+        longest_subseq = current_subseq
+    
+    return longest_subseq",0,False
+150,Write a python function to find whether the given number is present in the infinite sequence or not.,"def does_Contain_B(a, b, c):
+    current = a
+    while current <= b:
+        if current == c:
+            return True
+        current += 1
+    return False",1,True
+151,Write a python function to check whether the given number is co-prime or not.,"def is_coprime(a, b):
+    def gcd(x, y):
+        while y:
+            x, y = y, x % y
+        return x
+    
+    return gcd(a, b) == 1",1,True
+152,Write a function to sort the given array by using merge sort.,"def merge_sort(arr):
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
+
+        merge_sort(left_half)
+        merge_sort(right_half)
+
+        i = j = k = 0
+
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                arr[k] = left_half[i]
+                i += 1
+            else:
+                arr[k] = right_half[j]
+                j += 1
+            k += 1
+
+        while i < len(left_half):
+            arr[k] = left_half[i]
+            i += 1
+            k += 1
+
+        while j < len(right_half):
+            arr[k] = right_half[j]
+            j += 1
+            k += 1
+
+    return arr",1,True
+153,Write a function to find the vertex of a parabola.,"def parabola_vertex(a, b, c):
+    x_vertex = -b / (2 * a)
+    y_vertex = (4 * a * c - b**2) / (4 * a)
+    return (x_vertex, y_vertex)",1,True
+154,Write a function to extract every specified element from a given two dimensional list.,"def specified_element(matrix, element):
+    result = []
+    for row in matrix:
+        result.extend([i for i in row if i == element])
+    return result",0,False
+155,Write a python function to toggle all even bits of a given number.,"def even_bit_toggle_number(num):
+    mask = 0xAAAAAAAA  # Mask for even bits (binary: 10101010...)
+    result = num ^ mask
+    return result",0,False
+156,Write a function to convert a tuple of string values to a tuple of integer values.,"def tuple_int_str(string_tuple):
+    result = tuple(int(value) for value in string_tuple)
+    return result",0,False
+157,Write a function to reflect the run-length encoding from a list.,"def encode_list(lst):
+    if not lst:
+        return []
+    
+    encoded = []
+    count = 1
+    current = lst[0]
+    
+    for i in range(1, len(lst)):
+        if lst[i] == current:
+            count += 1
+        else:
+            encoded.append((count, current))
+            current = lst[i]
+            count = 1
+            
+    encoded.append((count, current))
+    
+    return encoded",0,False
+158,Write a python function to find k number of operations required to make all elements equal.,"def min_Ops(arr, n, k):
+    max_elem = max(arr)
+    operations = 0
+    
+    for num in arr:
+        operations += (max_elem - num) // k
+        if (max_elem - num) % k != 0:
+            operations += 1
+            
+    return operations",0,False
+159,Write a function to print the season for the given month and day.,"def month_season(month, day):
+    seasons = {
+        'Winter': [(12, 21), (3, 19)],
+        'Spring': [(3, 20), (6, 20)],
+        'Summer': [(6, 21), (9, 22)],
+        'Fall': [(9, 23), (12, 20)]
+    }
+    
+    month_days = {
+        'January': 1, 'February': 2, 'March': 3, 'April': 4,
+        'May': 5, 'June': 6, 'July': 7, 'August': 8,
+        'September': 9, 'October': 10, 'November': 11, 'December': 12
+    }
+    
+    month_num = month_days[month]
+    
+    for season, (start, end) in seasons.items():
+        if (month_num == start[0] and day >= start[1]) or (month_num == end[0] and day <= end[1]):
+            return season
+        elif start[0] < month_num < end[0]:
+            return season
+    
+    return 'Invalid date'",0,False
+160,Write a function to find x and y that satisfies ax + by = n.,"def solution(a, b, n):
+    for x in range(n // a + 1):
+        for y in range(n // b + 1):
+            if a * x + b * y == n:
+                return (x, y)
+    return None",0,False
+161,Write a function to remove all elements from a given list present in another list.,"def remove_elements(list1, list2):
+    result = [item for item in list1 if item not in list2]
+    return result",1,True
+162,Write a function to calculate the sum of the positive integers of n+(n-2)+(n-4)... (until n-x =< 0).,"def sum_series(n):
+    result = 0
+    while n > 0:
+        result += n
+        n -= 2
+    return result",1,True
+163,Write a function to calculate the area of a regular polygon.,"def area_polygon(sides, length):
+    import math
+    if sides < 3:
+        return 0
+    area = (sides * length**2) / (4 * math.tan(math.pi / sides))
+    return area",1,True
+164,Write a python function to check whether the sum of divisors are same or not.,"def areEquivalent(num1, num2):
+    def sum_of_divisors(n):
+        total = 0
+        for i in range(1, n + 1):
+            if n % i == 0:
+                total += i
+        return total
+
+    return sum_of_divisors(num1) == sum_of_divisors(num2)",0,False
+165,Write a python function to count characters at same position in a given string (lower and uppercase characters) as in english alphabet.,"def count_char_position(s):
+    count = 0
+    for i, char in enumerate(s):
+        if char.lower() == chr(97 + i):  # 97 is the ASCII value for 'a'
+            count += 1
+    return count",1,True
+166,Write a python function to count the pairs with xor as an even number.,"def find_even_Pair(arr, n):
+    count = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            if (arr[i] ^ arr[j]) % 2 == 0:
+                count += 1
+    return count",1,True
+167,Write a python function to find smallest power of 2 greater than or equal to n.,"def next_Power_Of_2(n):
+    if n <= 0:
+        return 1
+    power = 1
+    while power < n:
+        power *= 2
+    return power",1,True
+168,Write a python function to find the frequency of a number in a given array.,"def frequency(arr, num):
+    count = 0
+    for element in arr:
+        if element == num:
+            count += 1
+    return count",1,True
+169,Write a function to calculate the nth pell number.,"def get_pell(n):
+    if n < 0:
+        return None
+    elif n == 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        a, b = 0, 1
+        for _ in range(2, n + 1):
+            a, b = b, 2 * b + a
+        return b",1,True
+170,Write a function to find sum of the numbers in a list between the indices of a specified range.,"def sum_range_list(lst, start, end):
+    if start < 0 or end >= len(lst) or start > end:
+        return 0
+    return sum(lst[start:end + 1])",1,True
+171,Write a function to find the perimeter of a pentagon.,"def perimeter_pentagon(side_length):
+    result = 5 * side_length
+    return result",1,True
+172,Write a function to find the occurence of characters 'std' in the given string 1. list item 1. list item 1. list item 2. list item 2. list item 2. list item,"def count_occurance(s):
+    return s.count('std')",1,True
+173,Write a function to remove everything except alphanumeric characters from a string.,"def remove_splchar(input_string):
+    result = ''.join(char for char in input_string if char.isalnum())
+    return result",1,True
+174,Write a function to group a sequence of key-value pairs into a dictionary of lists.,"def group_keyvalue(pairs):
+    result = {}
+    for key, value in pairs:
+        if key not in result:
+            result[key] = []
+        result[key].append(value)
+    return result",1,True
+175,Write a function to verify validity of a string of parentheses.,"def is_valid_parenthese(s):
+    stack = []
+    for char in s:
+        if char == '(':
+            stack.append(char)
+        elif char == ')':
+            if not stack:
+                return False
+            stack.pop()
+    return len(stack) == 0",1,True
+176,Write a function to find the perimeter of a triangle.,"def perimeter_triangle(a, b, c):
+    result = a + b + c
+    return result",1,True
+177,Write a python function to find two distinct numbers such that their lcm lies within the given range.,"def answer(start, end):
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return a
+
+    def lcm(a, b):
+        return abs(a * b) // gcd(a, b)
+
+    for i in range(start, end + 1):
+        for j in range(i + 1, end + 1):
+            if start <= lcm(i, j) <= end:
+                return (i, j)
+    
+    return None",0,False
+178,Write a function to search some literals strings in a string.,"def string_literals(literals, text):
+    result = []
+    for literal in literals:
+        if literal in text:
+            result.append(literal)
+    return result",0,False
+179,Write a function to find if the given number is a keith number or not.,"def is_num_keith(n):
+    if n < 1:
+        return False
+    
+    digits = [int(d) for d in str(n)]
+    length = len(digits)
+    
+    sequence = digits[:]
+    
+    while True:
+        next_term = sum(sequence)
+        if next_term == n:
+            return True
+        elif next_term > n:
+            return False
+        sequence.append(next_term)
+        sequence.pop(0)",1,True
+180,Write a function to calculate distance between two points using latitude and longitude.,"def distance_lat_long(lat1, lon1, lat2, lon2):
+    from math import radians, sin, cos, sqrt, atan2
+
+    # Convert latitude and longitude from degrees to radians
+    lat1_rad = radians(lat1)
+    lon1_rad = radians(lon1)
+    lat2_rad = radians(lat2)
+    lon2_rad = radians(lon2)
+
+    # Haversine formula
+    dlon = lon2_rad - lon1_rad
+    dlat = lat2_rad - lat1_rad
+
+    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    # Radius of Earth in kilometers
+    radius = 6371.0
+
+    # Calculate the distance
+    distance = radius * c
+    return distance",0,False
+181,Write a function to find the longest common prefix in the given set of strings.,"def common_prefix(strings, n):
+    if n == 0:
+        return """"
+    
+    prefix = strings[0]
+    
+    for i in range(1, n):
+        while strings[i].find(prefix) != 0:
+            prefix = prefix[:-1]
+            if prefix == """":
+                return """"
+    
+    return prefix",1,True
+182,"Write a function to find uppercase, lowercase, special character and numeric values using regex.","def find_character(s):
+    import re
+    
+    uppercase = re.findall(r'[A-Z]', s)
+    lowercase = re.findall(r'[a-z]', s)
+    special_characters = re.findall(r'[^a-zA-Z0-9]', s)
+    numeric_values = re.findall(r'[0-9]', s)
+    
+    result = {
+        'uppercase': uppercase,
+        'lowercase': lowercase,
+        'special_characters': special_characters,
+        'numeric_values': numeric_values
+    }
+    
+    return result",0,False
+183,Write a function to count all the distinct pairs having a difference of k in any array.,"def count_pairs(arr, n, k):
+    seen = set()
+    pairs = set()
+    
+    for number in arr:
+        if (number - k) in seen:
+            pairs.add((number - k, number))
+        if (number + k) in seen:
+            pairs.add((number, number + k))
+        seen.add(number)
+    
+    return len(pairs)",0,False
+184,Write a function to find all the values in a list that are greater than a specified number.,"def greater_specificnum(lst, num):
+    result = [x for x in lst if x > num]
+    return result",0,False
+185,Write a function to find the focus of a parabola.,"def parabola_focus(h, k, p):
+    focus_x = h
+    focus_y = k + p
+    return (focus_x, focus_y)",0,False
+186,Write a function to search some literals strings in a string by using regex.,"def check_literals(string, literals):
+    import re
+    pattern = r'\b(' + '|'.join(map(re.escape, literals)) + r')\b'
+    matches = re.findall(pattern, string)
+    return matches",0,False
+187,Write a function to find the longest common subsequence for the given two sequences.,"def longest_common_subsequence(seq1, seq2, m, n):
+    L = [[0] * (n + 1) for i in range(m + 1)]
+
+    for i in range(m + 1):
+        for j in range(n + 1):
+            if i == 0 or j == 0:
+                L[i][j] = 0
+            elif seq1[i - 1] == seq2[j - 1]:
+                L[i][j] = L[i - 1][j - 1] + 1
+            else:
+                L[i][j] = max(L[i - 1][j], L[i][j - 1])
+
+    index = L[m][n]
+    lcs = [''] * (index + 1)
+    lcs[index] = ''
+
+    i = m
+    j = n
+    while i > 0 and j > 0:
+        if seq1[i - 1] == seq2[j - 1]:
+            lcs[index - 1] = seq1[i - 1]
+            i -= 1
+            j -= 1
+            index -= 1
+        elif L[i - 1][j] > L[i][j - 1]:
+            i -= 1
+        else:
+            j -= 1
+
+    return ''.join(lcs)",0,False
+188,Write a python function to check whether the given number can be represented by product of two squares or not.,"def prod_Square(n):
+    if n < 0:
+        return False
+    if n == 0:
+        return True
+    for i in range(int(n**0.5) + 1):
+        j = (n - i**2)**0.5
+        if j.is_integer():
+            return True
+    return False",0,False
+189,Write a python function to find the first missing positive number.,"def first_Missing_Positive(nums, n):
+    nums = [num for num in nums if num > 0]
+    nums_set = set(nums)
+    
+    for i in range(1, n + 1):
+        if i not in nums_set:
+            return i
+            
+    return n + 1",1,True
+190,Write a python function to count the number of integral co-ordinates that lie inside a square.,"def count_Intgral_Points(x1, y1, x2, y2):
+    if x1 > x2 or y1 > y2:
+        return 0
+    return (x2 - x1) * (y2 - y1)",0,False
+191,Write a function to check whether the given month name contains 30 days or not.,"def check_monthnumber(month_name):
+    months_with_30_days = [""April"", ""June"", ""September"", ""November""]
+    return month_name in months_with_30_days",1,True
+192,Write a python function to check whether a string has atleast one letter and one number.,"def check_String(s):
+    has_letter = any(c.isalpha() for c in s)
+    has_number = any(c.isdigit() for c in s)
+    return has_letter and has_number",1,True
+193,Write a function to remove the duplicates from the given tuple.,"def remove_tuple(input_tuple):
+    result = tuple(set(input_tuple))
+    return result",1,True
+194,Write a python function to convert octal number to decimal number.,"def octal_To_Decimal(octal):
+    decimal = 0
+    power = 0
+    while octal > 0:
+        digit = octal % 10
+        decimal += digit * (8 ** power)
+        octal //= 10
+        power += 1
+    return decimal",1,True
+195,Write a python function to find the first position of an element in a sorted array.,"def first(arr, target, n):
+    left, right = 0, n - 1
+    result = -1
+    
+    while left <= right:
+        mid = left + (right - left) // 2
+        
+        if arr[mid] == target:
+            result = mid
+            right = mid - 1
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+            
+    return result",1,True
+196,Write a function to remove all the tuples with length k.,"def remove_tuples(lst, k):
+    result = [t for t in lst if len(t) != k]
+    return result",1,True
+197,Write a function to perform the exponentiation of the given two tuples.,"def find_exponentio(tuple1, tuple2):
+    result = tuple(a ** b for a, b in zip(tuple1, tuple2))
+    return result",1,True
+198,Write a function to find the largest triangle that can be inscribed in an ellipse.,"def largest_triangle(a, b):
+    import math
+    
+    # The area of the largest triangle inscribed in an ellipse is given by the formula:
+    # Area = (a * b) * (sqrt(3) / 2)
+    area = (a * b) * (math.sqrt(3) / 2)
+    
+    return area",0,False
+199,Write a python function to find highest power of 2 less than or equal to given number.,"def highest_Power_of_2(n):
+    if n < 1:
+        return 0
+    power = 1
+    while power <= n:
+        power *= 2
+    return power // 2",1,True
+200,Write a function to find all index positions of the maximum values in a given list.,"def position_max(lst):
+    max_value = max(lst)
+    result = [index for index, value in enumerate(lst) if value == max_value]
+    return result",1,True
+201,Write a python function to check whether the elements in a list are same or not.,"def chkList(lst):
+    if not lst:
+        return True
+    return all(x == lst[0] for x in lst)",1,True
+202,Write a function to remove even characters in a string.,"def remove_even(s):
+    result = ''.join([s[i] for i in range(len(s)) if i % 2 != 0])
+    return result",0,False
+203,Write a python function to find the hamming distance between given two integers.,"def hamming_Distance(x, y):
+    return bin(x ^ y).count('1')",1,True
+204,Write a python function to count the occurrence of a given character in a string.,"def count(string, character):
+    result = string.count(character)
+    return result",1,True
+205,Write a function to find the inversions of tuple elements in the given tuple list.,"def inversion_elements(tuples_list):
+    inversions = []
+    for i in range(len(tuples_list)):
+        for j in range(i + 1, len(tuples_list)):
+            if tuples_list[i] > tuples_list[j]:
+                inversions.append((tuples_list[i], tuples_list[j]))
+    return inversions",0,False
+206,Write a function to perform the adjacent element concatenation in the given tuples.,"def concatenate_elements(tuples_list):
+    result = []
+    for tup in tuples_list:
+        concatenated = ''.join(str(tup[i]) + str(tup[i + 1]) for i in range(len(tup) - 1))
+        result.append(concatenated)
+    return result",0,False
+207,Write a function to count the longest repeating subsequences such that the two subsequences don’t have same string characters at same positions.,"def find_longest_repeating_subseq(s):
+    n = len(s)
+    dp = [[0] * (n + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        for j in range(1, n + 1):
+            if s[i - 1] == s[j - 1] and i != j:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+
+    return dp[n][n]",1,True
+208,Write a function to check the given decimal with a precision of 2 by using regex.,"def is_decimal(value):
+    import re
+    pattern = r'^\d+(\.\d{1,2})?$'
+    result = bool(re.match(pattern, value))
+    return result",1,True
+209,Write a function to delete the smallest element from the given heap and then insert a new item.,"def heap_replace(heap, new_item):
+    import heapq
+    
+    # Remove the smallest element
+    smallest = heapq.heappop(heap)
+    
+    # Insert the new item
+    heapq.heappush(heap, new_item)
+    
+    return heap",0,False
+210,"Write a function to check that the given string contains only a certain set of characters(in this case a-z, a-z and 0-9) by using regex.","def is_allowed_specific_char(s):
+    import re
+    pattern = r'^[a-zA-Z0-9]*$'
+    result = bool(re.match(pattern, s))
+    return result",1,True
