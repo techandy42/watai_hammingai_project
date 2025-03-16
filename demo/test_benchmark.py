@@ -1,10 +1,16 @@
 import json
 from openai import OpenAI
+from groq import Groq
 import os
 from tqdm import tqdm
+import time
 
-client = OpenAI(
-    api_key=os.getenv('OPENAI_API_KEY')
+# change depending on model
+# client = OpenAI(
+#     api_key=os.getenv('OPENAI_API_KEY')
+# )
+client = Groq(
+    api_key=os.environ.get("GROQ_API_KEY"),
 )
 
 def load_jsonl(file_path):
@@ -27,7 +33,7 @@ Identify the function with the bug.
 <source_code>
 
 <output_format>
-Please return the name of the function containing the bug, nothing else. Do not alter the name of the function in any way. If there is no bug, return 'none'.
+Please return the variable name of the function containing the bug, nothing else. Do not alter the name of the function in any way. If there is no bug, return 'none'.
 <output_format>
 """
 
@@ -53,8 +59,9 @@ def test_llm_on_jsonl(bics_results_file, jsonl_file, model="gpt-4o", temperature
                     messages=[
                         {"role": "user", "content": prompt}
                     ],
-                    temperature=temperature,
-                    max_tokens=16000,
+                    # temperature=temperature,
+                    # max_tokens=16000,
+                    max_completion_tokens=16000, # change depending on model
                 )
 
                 # Get the model's response
@@ -76,9 +83,9 @@ def test_llm_on_jsonl(bics_results_file, jsonl_file, model="gpt-4o", temperature
 
 
 def main():
-    bics_results_file = 'dataset_results/bics_results_file'
+    bics_results_file = 'dataset_results_deepseek_r1_distill_qwen_32b/bics_results_file' # change this
     jsonl_file = 'datasets/bug_in_codestack_dataset'
-    test_llm_on_jsonl(bics_results_file, jsonl_file)
+    test_llm_on_jsonl(bics_results_file, jsonl_file, "deepseek-r1-distill-qwen-32b") # change this
 
 if __name__ == "__main__":
     main()
