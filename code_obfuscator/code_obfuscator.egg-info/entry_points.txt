@@ -1,0 +1,2 @@
+[console_scripts]
+obfuscate = code_obfuscator.obfuscate:main
