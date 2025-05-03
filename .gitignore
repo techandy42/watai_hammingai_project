@@ -1,5 +1,6 @@
 **/__pycache__/
 .env
+.DS_Store
 local_notebooks/
 watai_hammingai_project.egg-info/
 demo/eval_results/
