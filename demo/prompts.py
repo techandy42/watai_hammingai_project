@@ -6,20 +6,32 @@ from typing import List, Dict, Any
 class CodegenPrompts:
     # XML format is more suitable for Llama and Claude models
     @staticmethod
-    def get_codegen_prompt(text: str, io_struct: Dict[str, Any]):
+    def get_codegen_prompt(text: str, io_struct: Dict[str, Any], test_list: List[str] = None):
+        # Extract function signature from first test
+        function_sig = None
+        if test_list is not None and len(test_list) > 0:
+            first_test = test_list[0]
+            func_name = first_test.split("(")[0].replace("assert ", "")
+            params = first_test.split("(")[1].split(")")[0]
+            function_sig = f"{func_name}({params})"
+
         nl = "\n"
-        nltab = "\n\t"
-        
         prompt = f"""
         Question:
         {text}
 
         Additional Instructions:
         - The output should be a valid Python code that wouldn't crash when ran.
-        - The name of the function of your program that serves as the entry point should be named: {io_struct["function_name"]}
-        - The parameters should have the following structure: {str(io_struct["input"])} ({len(io_struct["input"])} parameters in total)
-        - The output should have the following structure: {str(io_struct["output"])}
-        {f"- The output should be one of the following values: {str(io_struct['specific_output_values'])}{nl}" if io_struct["specific_output"] else ""}
+        - The function should have this exact signature: {function_sig if function_sig else 'function()'}
+        - Do not use input() statements - the function should take parameters and return values
+        - The function should return the result, not print it
+        - Make sure to include parentheses in the function definition
+
+        Example format:
+        def {func_name}({params}):
+            # Your code here
+            return result
+
         Warnings:
         - Do not include any type annotations in the input parameters.
         - Do not include any unit tests or example usage.
@@ -76,23 +88,31 @@ class CodevalTemplates:
     def get_codeval_template(code: str, test_list_1: List[str], test_list_2: List[str]) -> str:
         """
         Generates a code template by combining the user-provided code with test cases.
-        
-        Args:
-            code (str): The user's original code.
-            test_list_1 (List[str]): The first list of assert statements.
-            test_list_2 (List[str]): The second list of assert statements.
-        
-        Returns:
-            str: The combined code template ready for execution.
         """
-
+        # Extract function name from first test case
+        first_test = test_list_1[0] if test_list_1 is not None and len(test_list_1) > 0 else ""
+        func_name = first_test.split("(")[0].replace("assert ", "").strip()
+        
+        # Generate parameter names (a, b, c, etc.) based on number of parameters
+        params_values = first_test.split("(")[1].split(")")[0].split(",")
+        param_names = [chr(97 + i) for i in range(len(params_values))]  # a, b, c, ...
+        param_str = ", ".join(param_names)
+        
+        # Replace the function definition in the code
+        if "def function():" in code:
+            code = code.replace("def function():", f"def {func_name}({param_str}):")
+        elif "def function:" in code:  # Handle case without parentheses
+            code = code.replace("def function:", f"def {func_name}({param_str}):")
+        
+        # Remove any input() statements
+        code = code.replace("input(", "# input(")
+        
         nl = "\n"
         nltab = "\n    "
-
+        
         test_list = test_list_1 + test_list_2
-
         only_test_list = []
-
+        
         for test in test_list:
             try:
                 only_test_list.append(CodevalTemplates.extract_function_call(test))
@@ -100,17 +120,19 @@ class CodevalTemplates:
                 print(e)
         
         template_print_list = []
-        
         for test in only_test_list:
             formatted_test = f'try:{nltab}{test}{nl}except Exception as e:{nltab}print(e)'
             template_print_list.append(formatted_test)
-
-        template_print_lines = f'{nl.join(template_print_list)}'
         
+        template_print_lines = f'{nl.join(template_print_list)}'
         template_assert_lines = f'{nl.join(test_list)}'
         
-        template_parts = [code, template_print_lines, template_assert_lines]
+        # Add any required imports or setup code
+        setup_code = ""
+        if "import" in code:
+            setup_code = code.split("def")[0].strip()
+            code = "def" + code.split("def", 1)[1]
         
-        template = "\n\n".join(template_parts)
+        template_parts = [setup_code, code, template_print_lines, template_assert_lines] if setup_code else [code, template_print_lines, template_assert_lines]
         
-        return template
+        return "\n\n".join(filter(None, template_parts))

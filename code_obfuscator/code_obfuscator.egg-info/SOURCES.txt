@@ -1,0 +1,15 @@
+README.md
+setup.py
+code_obfuscator.egg-info/PKG-INFO
+code_obfuscator.egg-info/SOURCES.txt
+code_obfuscator.egg-info/dependency_links.txt
+code_obfuscator.egg-info/entry_points.txt
+code_obfuscator.egg-info/top_level.txt
+examples/__init__.py
+examples/example.py
+tests/__init__.py
+tests/test_obfuscator.py
+utils/__init__.py
+utils/code_transformer.py
+utils/identifier_analyzer.py
+utils/random_string_generator.py
